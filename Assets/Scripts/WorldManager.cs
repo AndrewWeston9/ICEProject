@@ -158,7 +158,9 @@ public class RegionBlock : MessageBase
             {
                 if (blockStructure[getIndex (i, j)] == 1)
                 {
-                  
+                  Vector3 pos = new Vector3 (i, 0, j);
+                  GameObject thisBrick = UnityEngine.Object.Instantiate (block, pos, Quaternion.identity);
+                  thisBrick.transform.SetParent (parentObjectTransform, false);
                 }
             }
         }

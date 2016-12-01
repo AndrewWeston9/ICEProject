@@ -14,12 +14,27 @@ public class RegionBlock : MessageBase
     public int blockSize;
     public int [] blockStructure;
     
-    // Utility function - get the index of the block element
-    // at coordinates (x, y) in the RegionBlock (requires 
-    // valid value for blockSize).
+    /// Utility function - get the index of the block element
+    /// at coordinates (x, y) in the RegionBlock (requires 
+    /// valid value for blockSize).
     public int getIndex (int x, int y)
     {
         return y * blockSize + x;
+    }
+    
+    /// Return the coordinates of the block in the world.
+    public Vector2 getPosition ()
+    {
+      return new Vector2 ((float) blockCoordX, (float) blockCoordY);
+    }
+    
+    /// Given coordinates (x,y), return true if
+    /// that position is in the RegionBlock. Assumes
+    /// each element in the block is 1 unit large.
+    public bool contains (float x, float y)
+    {
+      return ((x >= blockCoordX) && (x < blockCoordX + blockSize) &&
+              (y >= blockCoordY) && (y < blockCoordY + blockSize));
     }
     
     public RegionBlock ()
@@ -44,8 +59,8 @@ public class RegionBlock : MessageBase
         {
             for (int j = 0; j < blockSize; j += 1)
             {
-                int xc = blockCoordX * blockSize + i;
-                int yc = blockCoordY * blockSize + j;
+                int xc = blockCoordX + i;
+                int yc = blockCoordY + j;
                 xc = Math.Max (0, Math.Min (levelPattern.width, xc));
                 yc = Math.Max (0, Math.Min (levelPattern.height, yc));
                 if (levelPattern.GetPixel (xc, yc).r != 0)
@@ -60,7 +75,8 @@ public class RegionBlock : MessageBase
         }
     }
     
-    
+    /// Produce a simplified mesh representation. Scales the region block to fit completely into
+    /// a unit square.
     public void convertToMesh (Mesh mesh)
     {
         mesh.Clear ();
@@ -129,7 +145,22 @@ public class RegionBlock : MessageBase
             (y >= 0) && (y < blockSize))
         {
             blockStructure[getIndex (x, y)] = 1;
-            Debug.Log ("Setting " + x + " " + y);
+             Debug.Log ("Setting " + x + " " + y);
+        }
+    }
+    
+    // Build up a local copy of the scene from information in the region block.
+    public void placeBlocks (GameObject block, Transform parentObjectTransform)
+    {
+        for (int i = 0; i < blockSize; i += 1)
+        {
+            for (int j = 0; j < blockSize; j += 1)
+            {
+                if (blockStructure[getIndex (i, j)] == 1)
+                {
+                  
+                }
+            }
         }
     }
 }
@@ -159,18 +190,23 @@ public class LevelStructure
         {
             for (int j = 0; j < blocksy; j += 1)
             {
-                levelStructures[i, j] = new RegionBlock (levelPattern, i, j, blockSize);
+                levelStructures[i, j] = new RegionBlock (levelPattern, i * blockSize, j * blockSize, blockSize);
                 levelViewObjects[i, j] = null;
             }
         }
     }
     
-    public RegionBlock getRegion (int x, int y)
+    /// Find the region block corresponding to the provided coordinates.
+    /// Assumes each Region Block is blockSize in size.
+    public RegionBlock getRegion (float x, float y)
     {
-        if ((x >= 0) && (x < levelStructures.GetLength (0)) &&
-            (y >= 0) && (y < levelStructures.GetLength (1)))
+        int ix = (int) (x / blockSize);
+        int iy = (int) (y / blockSize);
+        
+        if ((ix >= 0) && (ix < levelStructures.GetLength (0)) &&
+            (iy >= 0) && (iy < levelStructures.GetLength (1)))
         {
-            return levelStructures[x, y];
+            return levelStructures[ix, iy];
         }
         else
         {
@@ -186,7 +222,7 @@ public class LevelStructure
         {
             for (int j = 0; j < levelStructures.GetLength (1); j += 1)
             {
-                RegionBlock rb = getRegion (i, j);
+                RegionBlock rb = getRegion (i * blockSize, j * blockSize);
                 
                 if (rb != null)
                 {
@@ -204,7 +240,7 @@ public class LevelStructure
         {
             for (int j = 0; j < levelStructures.GetLength (1); j += 1)
             {
-                RegionBlock rb = getRegion (i, j);
+                RegionBlock rb = getRegion (i * blockSize, j * blockSize);
                 
                 if (rb != null)
                 {
@@ -223,13 +259,10 @@ public class LevelStructure
     
     public void setBlock (float x, float y)
     {
-        int bx = (int) (x);
-        int by = (int) (y);
+        int rx = ((int) x) % blockSize;
+        int ry = ((int) y) % blockSize;
         
-        int rx = (int) ((x - (float) bx) * blockSize);
-        int ry = (int) ((y - (float) by) * blockSize);
-        
-        RegionBlock rb = getRegion (bx, by);
+        RegionBlock rb = getRegion (x, y);
         
         if (rb != null)
         {
@@ -267,11 +300,15 @@ public class WorldManager : NetworkBehaviour {
     
     private Dictionary<int, ClientDetails> playerMonitoring;
     
+    private int blockSize;
+    
     // Use this for initialization
     void Start () {
+        blockSize = 10;
+      
         playerMonitoring = new Dictionary<int, ClientDetails> ();
         
-        levelStructure = new LevelStructure (mapPattern, 10);
+        levelStructure = new LevelStructure (mapPattern, blockSize);
         
         levelStructure.convertToMesh (regionBlank, transform);        
     }
@@ -307,7 +344,7 @@ public class WorldManager : NetworkBehaviour {
         
         ClientDetails thiscd = playerMonitoring[connId];
         thiscd.position = position;
-        thiscd.representation.transform.localPosition = new Vector3 (thiscd.position.x, thiscd.position.z, 0.0f);
+        thiscd.representation.transform.localPosition = new Vector3 (thiscd.position.x / blockSize, thiscd.position.z / blockSize, 0.0f);
     }
     
     /// Handle incoming commands from the client. 
@@ -322,7 +359,7 @@ public class WorldManager : NetworkBehaviour {
                 
                 updatePlayer (netMsg.conn.connectionId, m.playerPosition);
                 
-                MessageBase nm = levelStructure.getRegion ((int) m.playerPosition.x, (int) m.playerPosition.z);
+                MessageBase nm = levelStructure.getRegion (m.playerPosition.x, m.playerPosition.z);
                 if (nm != null)
                 {
                     NetworkServer.SendToClient (netMsg.conn.connectionId, LevelMsgType.LevelResponse, nm); 
@@ -333,7 +370,7 @@ public class WorldManager : NetworkBehaviour {
             {
                 Debug.Log ("Changed level");
                 BlockAddMessage m = netMsg.ReadMessage<BlockAddMessage>();
-                levelStructure.setBlock (m.px, m.pz);
+                levelStructure.setBlock (m.px + 0.5f, m.pz + 0.5f);
             }
             break;
             default:

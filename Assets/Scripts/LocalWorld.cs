@@ -16,18 +16,54 @@ class BlockAddMessage : MessageBase
     public float pz;
 }
 
+/// A local level block represents a component of the environment
+/// in which the player exists. The complete environment will consist
+/// of several of these blocks, and any other environmentally global
+/// components.
+/// This class allow interrogation of the local world structure, as 
+/// recently updated from the master copy on the server. It also matches
+/// this to GameObjects in the scene holding geometry and other attributes.
+class LocalLevelBlock
+{
+    public RegionBlock region;
+    public GameObject  gobject;
+}
+
 public class LocalWorld : NetworkBehaviour {
+
+    /// The game object that will be the base object for each
+    /// local level block. Presumably an empty.
+    public GameObject localLevelElement;
     
-    public Texture2D mapPattern;
+    /// The game object used to represent a brick.
+    public GameObject localBrick;
+    
+    private List<LocalLevelBlock> levelStructure; 
     
     private bool foundPlayer;
     
     // Use this for initialization
     void Start () {
+        levelStructure = new List<LocalLevelBlock> ();
+        
         foundPlayer = false;
         
         Debug.Log ("Local world level instance started");
         
+    }
+    
+    /// Identify the level block corresponding to a particular position.
+    /// May return null if no such block is cached locally.
+    LocalLevelBlock findLevelBlock (Vector3 position)
+    {
+        foreach (LocalLevelBlock i in levelStructure)
+        {
+            if (i.region.contains (position.x, position.z))
+            {
+                return i;
+            }
+        }
+        return null;
     }
     
     public override void OnStartClient()
@@ -69,11 +105,39 @@ public class LocalWorld : NetworkBehaviour {
     
     void ServerCommandHandler (NetworkMessage netMsg)
     {
-        RegionBlock rb = netMsg.ReadMessage<RegionBlock>();
-        Debug.Log ("Server Got message: " + rb.blockSize);
-        
-        MeshFilter mf = GetComponent <MeshFilter>();
-        rb.convertToMesh (mf.mesh);        
+        switch (netMsg.msgType)
+        {
+            case LevelMsgType.LevelResponse:
+            {
+                
+                RegionBlock rb = netMsg.ReadMessage<RegionBlock>();
+                Debug.Log ("Server Got message: " + rb.blockSize);
+                
+                MeshFilter mf = GetComponent <MeshFilter>();
+                rb.convertToMesh (mf.mesh);        
+                
+                Vector2 rbpos = rb.getPosition ();
+                Vector3 llbpos = new Vector3 (rbpos.x, 0.0f, rbpos.y);
+                LocalLevelBlock llb = findLevelBlock (llbpos);
+                if (llb == null)
+                {
+                    Debug.Log ("New local block " + llbpos);
+                    llb = new LocalLevelBlock ();
+                    llb.region = rb;
+                    llb.gobject = Object.Instantiate (localLevelElement, llbpos, Quaternion.identity);
+                    levelStructure.Add (llb);
+                }
+                
+                // llb should now be valid.
+                llb.region.placeBlocks (localBrick, llb.gobject.transform);
+            }
+            break;
+            default:
+            {
+                Debug.Log ("Unexpected message type in LocalWorld");                
+            }
+            break;
+        }
     }
     
     // Add a new block at the given position.

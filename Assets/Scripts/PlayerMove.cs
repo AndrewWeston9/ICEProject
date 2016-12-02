@@ -35,10 +35,10 @@ public class PlayerMove : NetworkBehaviour
             int py = (int) playerpos.y;
             int pz = (int) (playerpos.z + 0.5);
             
-            localWorld.placeBlock (playerpos.x, playerpos.z);
+            localWorld.placeBlock (px, pz);
 
-            Vector3 pos = new Vector3 (px, py + 0.5f, pz);
-            GameObject thisBrick = Object.Instantiate (brick, pos, Quaternion.identity);
+//             Vector3 pos = new Vector3 (px, py + 0.5f, pz);
+//             GameObject thisBrick = Object.Instantiate (brick, pos, Quaternion.identity);
                     
 //             thisBrick.transform.parent = levelObject.transform;
             y = 0.2f;

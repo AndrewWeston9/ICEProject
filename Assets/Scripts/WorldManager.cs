@@ -14,6 +14,16 @@ public class RegionBlock : MessageBase
     public int blockSize;
     public int [] blockStructure;
     
+    /// A timestamp indicating the time at which this object was
+    /// last written.
+    public float timeLastChanged;
+
+    /// Update the time stamp to current time.
+    private void updateTimeStamp ()
+    {
+        timeLastChanged = Time.time;
+    }
+    
     /// Utility function - get the index of the block element
     /// at coordinates (x, y) in the RegionBlock (requires 
     /// valid value for blockSize).
@@ -37,6 +47,15 @@ public class RegionBlock : MessageBase
               (y >= blockCoordY) && (y < blockCoordY + blockSize));
     }
     
+    /// Given coordinates (x,y) and a radius, return true if
+    /// the disc (square) centered at those coordinates overlaps the region block. 
+    /// Assumes each element in the block is 1 unit large.
+    public bool contains (float x, float y, float radius)
+    {
+      return ((x + radius >= blockCoordX) && (x - radius < blockCoordX + blockSize) &&
+              (y + radius >= blockCoordY) && (y - radius < blockCoordY + blockSize));
+    }
+    
     public RegionBlock ()
     {
         blockCoordX = 0;
@@ -44,6 +63,7 @@ public class RegionBlock : MessageBase
         
         blockSize = 0;
         blockStructure = null;        
+        updateTimeStamp ();
     }
     
     // Initialize a region block from the texture source, taking a blocksize square
@@ -73,6 +93,7 @@ public class RegionBlock : MessageBase
                 }
             }
         }
+        updateTimeStamp ();
     }
     
     /// Produce a simplified mesh representation. Scales the region block to fit completely into
@@ -145,8 +166,16 @@ public class RegionBlock : MessageBase
             (y >= 0) && (y < blockSize))
         {
             blockStructure[getIndex (x, y)] = 1;
-             Debug.Log ("Setting " + x + " " + y);
+//              Debug.Log ("Setting " + x + " " + y);
+            updateTimeStamp ();
         }
+    }
+    
+    public void placeSingleBlock (GameObject block, Vector2 position, Transform parentObjectTransform)
+    {
+      Vector3 blockpos = new Vector3 (position.x, 0.0f, position.y);
+      GameObject thisBrick = UnityEngine.Object.Instantiate (block, blockpos, Quaternion.identity);
+      thisBrick.transform.SetParent (parentObjectTransform, false);
     }
     
     // Build up a local copy of the scene from information in the region block.
@@ -156,11 +185,12 @@ public class RegionBlock : MessageBase
         {
             for (int j = 0; j < blockSize; j += 1)
             {
+//                   Debug.Log ("Block at " + i + " , " + j + " ==" + blockStructure[getIndex (i, j)] + " - " + timeLastChanged);
                 if (blockStructure[getIndex (i, j)] == 1)
                 {
-                  Vector3 pos = new Vector3 (i, 0, j);
-                  GameObject thisBrick = UnityEngine.Object.Instantiate (block, pos, Quaternion.identity);
-                  thisBrick.transform.SetParent (parentObjectTransform, false);
+                  Vector3 pos = new Vector2 (i, j);
+                  placeSingleBlock (block, pos, parentObjectTransform);
+//                   Debug.Log ("Block at " + i + " , " + j);
                 }
             }
         }
@@ -281,27 +311,89 @@ public class LevelMsgType {
     public const short LevelUpdate = MsgType.Highest + 3;
 };
 
+public class AccessedRegion
+{
+    public RegionBlock region;
+
+    /// A timestamp representing the time at which the last update
+    /// was sent to the client. 
+    public float timeLastUpdate;
+    
+    /// Used to ensure each region is checked.
+    public bool tagged;
+}
+
 public class ClientDetails
 {
+    /// Last updated position of the player.
     public Vector3 position;
     
+    /// Game object providing the server view proxy 
+    /// representation on the server dashboard.
     public GameObject representation;
+    
+    /// The distance around the player's position that
+    /// the client wants to receive updates for.
+    public float radius;
+    
+    /// List of region blocks that this client is receiving updates for.
+    public List<AccessedRegion> activeRegions;
+
+    /// The position of the player during which the player's 
+    /// list of current regions was last updated. Don't update
+    /// this list until the player has moved a signifcant distance.
+    public Vector3 lastUpdatePosition;
+    
+    /// The threshold distance required for updating list of regions.
+    public const float updateDistance = 2.0f;
+    
+    public ClientDetails ()
+    {
+        activeRegions = new List<AccessedRegion> ();
+    }
+    
+    /// Return the record for the given regionBlock, null
+    /// if it doesn't exist.
+    public AccessedRegion findRegion (RegionBlock rb)
+    {
+        foreach (AccessedRegion ar in activeRegions)
+        {
+            if (ar.region == rb)
+            {
+                return ar;
+            }
+        }
+        return null;
+    }
 }
 
 public class WorldManager : NetworkBehaviour {
     
+    /// A texture representing the current level layout.
     public Texture2D mapPattern;
     
+    /// The game object that will be instantiated on each client
+    /// to manage the client side representation of the portion of
+    /// level managed by the client.
     public GameObject localLevelPrefab;
     
+    /// The game object used to show each of the regions to provide
+    /// a server dashboard view of the entire game level.
     public GameObject regionBlank;
     
+    /// The game object containing the representation of each of the
+    /// players that will be overlaid on the server dashboard view.
     public GameObject playerProxy;
     
+    /// The data structure representing the complete world state, which is
+    /// synchronized with the LocalWorld copies on each client.
     private LevelStructure levelStructure;
     
+    /// The details of each client, indexed by the connection identifier.
     private Dictionary<int, ClientDetails> playerMonitoring;
     
+    /// The number of blocks (blocksize ^ 2) in each of the region chunks
+    /// representing the smallest chunk of a level which is shared.
     private int blockSize;
     
     // Use this for initialization
@@ -330,23 +422,104 @@ public class WorldManager : NetworkBehaviour {
         Debug.Log ("Spawn local with id " + localLevel.GetComponent<NetworkIdentity>().netId);
     }
     
-    // Visually track player on level.
-    void updatePlayer (int connId, Vector3 position)
+    /// Retrieve the record corresponding to the given player's connection.
+    /// Creates a new blank record if none exists yet.
+    ClientDetails getPlayerDetails (int connectionId)
     {
-        if (!playerMonitoring.ContainsKey (connId))
+        ClientDetails cd;
+        if (!playerMonitoring.ContainsKey (connectionId))
         {
-            ClientDetails cd = new ClientDetails ();
+            cd = new ClientDetails ();
+
             Vector3 spawnPosition = new Vector3 (0, 0, 0);
             Quaternion spawnRotation = Quaternion.Euler(0.0f, 0.0f, 0.0f);
             cd.representation = (GameObject) Instantiate (playerProxy, spawnPosition, spawnRotation);
             cd.representation.transform.parent = transform;
             
-            playerMonitoring.Add (connId, cd);
+            playerMonitoring.Add (connectionId, cd);
         }
-        
-        ClientDetails thiscd = playerMonitoring[connId];
-        thiscd.position = position;
+        else
+        {
+            cd = playerMonitoring[connectionId];
+        }
+        return cd;
+    }
+    
+    /// Visually track player on level dashboard.
+    void updatePlayerProxy (int connId)
+    {
+        ClientDetails thiscd = getPlayerDetails (connId);
         thiscd.representation.transform.localPosition = new Vector3 (thiscd.position.x / blockSize, thiscd.position.z / blockSize, 0.0f);
+    }
+    
+    /// Send an update to the player identified by the given connection ID. Work out
+    /// which regions have changed, and communicate those details.
+    void sendPlayerUpdate (int connectionId, Vector3 position, float visibleRadius)
+    {
+        ClientDetails cd = getPlayerDetails (connectionId);
+        cd.position = position;
+        cd.radius = visibleRadius;
+        
+        // Check that the list of accessed regions is still up to date.
+        if (Vector3.Distance (cd.position, cd.lastUpdatePosition) > ClientDetails.updateDistance)
+        {
+            // Clear tags.
+            foreach (AccessedRegion ar in cd.activeRegions)
+            {
+                ar.tagged = false;
+            }
+
+            // Make sure all regions in the radius are tracked and tagged.
+            int blockr = (int) (cd.radius / blockSize);
+            for (int offx = -blockr; offx <= blockr; offx ++)
+            {
+                for (int offy = -blockr; offy <= blockr; offy ++)
+                {
+                    RegionBlock rb = levelStructure.getRegion (cd.position.x + offx * blockSize, cd.position.z + offy * blockSize);
+                    if (rb != null)
+                    {
+//                         Debug.Log ("Updating player at rb " + rb + " xx " + rb.blockCoordX + " - " + rb.blockCoordY);
+                        
+                        AccessedRegion ar = cd.findRegion (rb);
+                        if (ar == null)
+                        {
+                            ar = new AccessedRegion ();
+                            ar.region = rb;
+                            ar.timeLastUpdate = 0; // force update.
+                            cd.activeRegions.Add (ar);
+                        }
+                        ar.tagged = true;
+                    }
+                }
+            }
+            
+            // Remove any regions not tagged (no longer in radius)
+            for (int i = cd.activeRegions.Count - 1; i >= 0; i--)
+            {
+                if (!cd.activeRegions[i].tagged)
+                {
+                    cd.activeRegions.RemoveAt (i);
+                }
+            }
+            
+            // Mark the position of last region list update.
+            cd.lastUpdatePosition = cd.position;
+        }
+
+         Debug.Log ("Updating player at " + cd.activeRegions + " --- " + cd.activeRegions.Count);
+        
+        
+        // Send updates for those regions on the list who have changed since the last update timestamp.
+        foreach (AccessedRegion ar in cd.activeRegions)
+        {
+            if (ar.timeLastUpdate < ar.region.timeLastChanged)
+            {
+               Debug.Log ("Updating player at " + ar.timeLastUpdate + " - " + ar.region.timeLastChanged);            
+                NetworkServer.SendToClient (connectionId, LevelMsgType.LevelResponse, ar.region); 
+                // update timestamp.
+                ar.timeLastUpdate = Time.time;
+            }
+        }
     }
     
     /// Handle incoming commands from the client. 
@@ -357,15 +530,18 @@ public class WorldManager : NetworkBehaviour {
             case LevelMsgType.LevelRequest:
             {
                 LevelSyncMessage m = netMsg.ReadMessage<LevelSyncMessage>();
-//                 Debug.Log ("Got message: " + m.message + " : " + netMsg.conn.connectionId + " : " + m.playerPosition);
+                Debug.Log ("Got message: " + m.message + " : " + netMsg.conn.connectionId + " : ");                
                 
-                updatePlayer (netMsg.conn.connectionId, m.playerPosition);
+                sendPlayerUpdate (netMsg.conn.connectionId, m.playerPosition, m.visibleRadius);
                 
-                MessageBase nm = levelStructure.getRegion (m.playerPosition.x, m.playerPosition.z);
+                updatePlayerProxy (netMsg.conn.connectionId);
+                
+/*                MessageBase nm = levelStructure.getRegion (m.playerPosition.x, m.playerPosition.z);
                 if (nm != null)
                 {
                     NetworkServer.SendToClient (netMsg.conn.connectionId, LevelMsgType.LevelResponse, nm); 
-                }
+                }*/
+                
             }
             break;
             case LevelMsgType.LevelUpdate:

@@ -3,14 +3,19 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
 
+/// A message sent by client to server advising of player position.
 class LevelSyncMessage : MessageBase
 {
-    public string message;
-    
+    /// Position in space of the player.
     public Vector3 playerPosition;
+    
+    /// The distance that the player should be able to see. The server
+    /// will register the player's interest in neighbouring region blocks
+    /// as defined by this.
     public float   visibleRadius;
 }
 
+/// The message sent when the player is updating the level. 
 class BlockAddMessage : MessageBase
 {
     public float px;
@@ -30,6 +35,9 @@ public class LocalLevelBlock
     public GameObject  gobject;
 }
 
+/// A client equivalent of the Level Structure and World Managers. Cached
+/// copies of the regionblocks that the client can use for navigating about
+/// thw world.
 public class LocalWorld : NetworkBehaviour {
 
     /// The game object that will be the base object for each
@@ -41,16 +49,17 @@ public class LocalWorld : NetworkBehaviour {
     
     /// Define the distance about the player that we
     /// are interested in seeing things.
-    private float viewRadius;
+    public float viewRadius;
     
+    /// Local level cache.
     private List<LocalLevelBlock> levelStructure; 
     
+    /// The class will attempt to register with the player object. Once
+    /// this has been achieved then this value will be set to true.
     private bool foundPlayer;
     
     // Use this for initialization
     void Start () {
-        viewRadius = 15.0f;
-        
         levelStructure = new List<LocalLevelBlock> ();
         
         foundPlayer = false;
@@ -78,7 +87,7 @@ public class LocalWorld : NetworkBehaviour {
     /// not already exist, or a duplicate will be created.
     LocalLevelBlock addLevelBlock (RegionBlock rb, Vector3 position)
     {
-        Debug.Log ("New local block " + position);
+//         Debug.Log ("New local block " + position);
         LocalLevelBlock llb = new LocalLevelBlock ();
         llb.region = rb;
         llb.gobject = Object.Instantiate (localLevelElement, position, Quaternion.identity);
@@ -108,6 +117,8 @@ public class LocalWorld : NetworkBehaviour {
         
     }
     
+    /// This object is deployed on the clients. When it starts:
+    ///   - Register a network message handler for any level updates.
     public override void OnStartClient()
     {
         Debug.Log ("On Client start " + NetworkClient.allClients);
@@ -128,16 +139,15 @@ public class LocalWorld : NetworkBehaviour {
             }
         }
         
-        //         Debug.Log ("Update");
+        // Send player position to the server.
         NetworkManager nm = NetworkManager.singleton;
-        if (ClientScene.localPlayers.Count > 0)
+        if ((nm.client != null) && (foundPlayer))
         {
-            PlayerController player = ClientScene.localPlayers[0];
-            
-            if (nm.client != null)
+            if (ClientScene.localPlayers.Count > 0)
             {
+                PlayerController player = ClientScene.localPlayers[0];
+                
                 LevelSyncMessage m = new LevelSyncMessage ();
-                m.message = "Hello World!";
                 m.playerPosition = player.gameObject.transform.position;
                 m.visibleRadius = viewRadius;
                 
@@ -146,14 +156,18 @@ public class LocalWorld : NetworkBehaviour {
         }
     }
     
+    /// Handle incoming updates from the server.
     void ServerCommandHandler (NetworkMessage netMsg)
     {
         switch (netMsg.msgType)
         {
             case LevelMsgType.LevelResponse:
+                // Received an updated region block from the server. Update
+                // the cache, and ensure that the local visual representation
+                // is consistent.
             {
                 RegionBlock rb = netMsg.ReadMessage<RegionBlock>();
-                Debug.Log ("Server Got message: " + rb.blockSize);
+//                 Debug.Log ("Server Got message: " + rb.blockSize);
                 
                 MeshFilter mf = GetComponent <MeshFilter>();
                 rb.convertToMesh (mf.mesh);        
@@ -174,7 +188,7 @@ public class LocalWorld : NetworkBehaviour {
                     if (rb.timeLastChanged > llb.region.timeLastChanged)
                     {
                         llb.region = rb;
-                        Debug.Log ("Got update ..................................>");
+//                         Debug.Log ("Got update ..................................>");
                         llb.region.placeBlocks (localBrick, llb.gobject.transform);
                     }
                 }
@@ -182,6 +196,7 @@ public class LocalWorld : NetworkBehaviour {
                 flushRegions ();
             }
             break;
+            
             default:
             {
                 Debug.Log ("Unexpected message type in LocalWorld");                
@@ -190,7 +205,9 @@ public class LocalWorld : NetworkBehaviour {
         }
     }
     
-    // Add a new block at the given position.
+    // Add a new block at the given position. The intent is to allow players to immediately
+    // reflect actions in the local game, which may eventually be replaced when the update
+    // is returned from the server.
     public void placeBlock (float x, float z)
     {
         Vector3 llbpos = new Vector3 (x, 0.0f, z);
@@ -199,10 +216,10 @@ public class LocalWorld : NetworkBehaviour {
         {
             Vector3 regionpos = new Vector3 (x - llb.region.blockCoordX, z - llb.region.blockCoordY);
             // llb should now be valid.
-//            llb.region.placeSingleBlock (localBrick, regionpos, llb.gobject.transform);
+            llb.region.placeSingleBlock (localBrick, regionpos, llb.gobject.transform);
         }
         else
-        // else no region - potential problem.
+            // else no region - potential problem.
         {
             Debug.Log ("No level block at " + llbpos);
         }

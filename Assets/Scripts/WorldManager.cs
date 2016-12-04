@@ -6,7 +6,7 @@ using UnityEngine.Networking;
 using System;
 
 /// Represents a square block of the level, intended for
-/// sharing over the network.
+/// sharing over the network. 
 public class RegionBlock : MessageBase
 {
     public int blockCoordX;
@@ -56,6 +56,7 @@ public class RegionBlock : MessageBase
               (y + radius >= blockCoordY) && (y - radius < blockCoordY + blockSize));
     }
     
+    /// Default constructor.
     public RegionBlock ()
     {
         blockCoordX = 0;
@@ -66,8 +67,8 @@ public class RegionBlock : MessageBase
         updateTimeStamp ();
     }
     
-    // Initialize a region block from the texture source, taking a blocksize square
-    // from position (x * blocksize,y * blocksize)
+    /// Initialize a region block from the texture source, taking a blocksize square
+    /// from position (x, y)
     public RegionBlock (Texture2D levelPattern, int x, int y, int mblockSize)
     {
         blockCoordX = x;
@@ -160,6 +161,8 @@ public class RegionBlock : MessageBase
         mesh.triangles = tri;
     }
     
+    /// Modify the level by making a block appear at (x,y). These
+    /// coordinates are relative to this RegionBlock.
     public void setBlock (int x, int y)
     {
         if ((x >= 0) && (x < blockSize) && 
@@ -171,42 +174,59 @@ public class RegionBlock : MessageBase
         }
     }
     
+    /// Modify the scene to draw a brick at the given coordinates. Really nothing to do
+    /// with a region block and could be transferred to an appropriate view class.
     public void placeSingleBlock (GameObject block, Vector2 position, Transform parentObjectTransform)
     {
-      Vector3 blockpos = new Vector3 (position.x, 0.0f, position.y);
+      Vector3 blockpos = new Vector3 (position.x, 2.0f, position.y);
       GameObject thisBrick = UnityEngine.Object.Instantiate (block, blockpos, Quaternion.identity);
       thisBrick.transform.SetParent (parentObjectTransform, false);
     }
     
-    // Build up a local copy of the scene from information in the region block.
+    /// Build up a local copy of the scene from information in the region block. Also needs to end
+    /// up in a view class, using appropriate methods to query the RegionBlock information.
+    
+    /// Removes all current views of that block.
     public void placeBlocks (GameObject block, Transform parentObjectTransform)
     {
+        for (int i = parentObjectTransform.childCount - 1; i >= 0; i--)
+        {
+            Transform child = parentObjectTransform.GetChild (i);
+            UnityEngine.Object.Destroy(child.gameObject);
+        }
+        
         for (int i = 0; i < blockSize; i += 1)
         {
             for (int j = 0; j < blockSize; j += 1)
             {
-//                   Debug.Log ("Block at " + i + " , " + j + " ==" + blockStructure[getIndex (i, j)] + " - " + timeLastChanged);
+                //                   Debug.Log ("Block at " + i + " , " + j + " ==" + blockStructure[getIndex (i, j)] + " - " + timeLastChanged);
                 if (blockStructure[getIndex (i, j)] == 1)
                 {
-                  Vector3 pos = new Vector2 (i, j);
-                  placeSingleBlock (block, pos, parentObjectTransform);
-//                   Debug.Log ("Block at " + i + " , " + j);
+                    Vector3 pos = new Vector2 (i, j);
+                    placeSingleBlock (block, pos, parentObjectTransform);
+                    //                   Debug.Log ("Block at " + i + " , " + j);
                 }
             }
         }
     }
 }
 
+/// A class representing the entire level. This will only ever be instantiated
+/// on the server. It is designed to be easily be decomposed into the individual
+/// RegionBlocks which can be shared with the client, and this subset of RegionBlocks
+/// maintained on the client as a cached version of a subset of the level.
 public class LevelStructure
 {
-    // The blocks representing the level.
+    /// The blocks representing the level.
     protected RegionBlock [,] levelStructures;
     
-    // The objects used on the server to visualize the level.
+    /// The objects used on the server to visualize the level.
     protected GameObject [,]  levelViewObjects;
 
+    /// The number of bricks in each dimension of the region blocks used.
     protected int blockSize;
     
+    /// Construct a level using a texture as the source of data.
     public LevelStructure (Texture2D levelPattern, int mblockSize)
     {
         blockSize = mblockSize;
@@ -246,8 +266,8 @@ public class LevelStructure
         }
     }
 
-    // Update the geometry representation of the level. Used on the server
-    // for visualization.
+    /// Update the geometry representation of the level. Used on the server
+    /// for visualization.
     public void refreshMesh ()
     {
         for (int i = 0; i < levelStructures.GetLength (0); i += 1)
@@ -266,6 +286,8 @@ public class LevelStructure
         }
     }
     
+    /// Create an instance of the geometry representation of the level, which can
+    /// then be updated using refreshMesh.
     public void convertToMesh (GameObject regionBlank, Transform transform)
     {
         for (int i = 0; i < levelStructures.GetLength (0); i += 1)
@@ -289,6 +311,7 @@ public class LevelStructure
         }
     }
     
+    /// Place a block at the given coordinates, relative to the entire level itself.
     public void setBlock (float x, float y)
     {
         int rx = ((int) x) % blockSize;
@@ -305,12 +328,23 @@ public class LevelStructure
     }
 }
 
+/// Messages used for client/server synchronization to maintain the level
+/// coordination.
 public class LevelMsgType {
+    /// Notify of a player position update, allowing the details of the
+    /// regions being supplied to the client to be modified.
     public const short LevelRequest = MsgType.Highest + 1;
+    
+    /// Send a region block update to the client.
     public const short LevelResponse = MsgType.Highest + 2;        
+    
+    /// Player indicates some action resulting in a modification to the
+    /// master copy of the level.
     public const short LevelUpdate = MsgType.Highest + 3;
 };
 
+/// For each client, keep track of which regions are within a zone of interest.
+/// If any of these regions change, then send an update to that client.
 public class AccessedRegion
 {
     public RegionBlock region;
@@ -323,6 +357,9 @@ public class AccessedRegion
     public bool tagged;
 }
 
+/// An element of a list of clients, keeping track of where that player is
+/// and which regions that player is interested in. Regions of interest are 
+/// actually square, despite being described by a radius parameter.
 public class ClientDetails
 {
     /// Last updated position of the player.
@@ -347,9 +384,13 @@ public class ClientDetails
     /// The threshold distance required for updating list of regions.
     public const float updateDistance = 2.0f;
     
+    /// Constructor for a new player entry.
     public ClientDetails ()
     {
         activeRegions = new List<AccessedRegion> ();
+        
+        // far far away - ensure update as soon as player starts.
+        lastUpdatePosition = new Vector3 (1e32f, 1e32f, 1e32f);
     }
     
     /// Return the record for the given regionBlock, null
@@ -367,6 +408,7 @@ public class ClientDetails
     }
 }
 
+/// State management for the world as represented on the server.
 public class WorldManager : NetworkBehaviour {
     
     /// A texture representing the current level layout.
@@ -407,6 +449,9 @@ public class WorldManager : NetworkBehaviour {
         levelStructure.convertToMesh (regionBlank, transform);        
     }
     
+    /// When the server starts:
+    ///   - Register a handler for any messages that might originate from a client.
+    ///   - Create a server dashboard object to visualize the level.
     public override void OnStartServer ()
     {
         NetworkServer.RegisterHandler (LevelMsgType.LevelRequest, ClientCommandHandler);
@@ -506,15 +551,14 @@ public class WorldManager : NetworkBehaviour {
             cd.lastUpdatePosition = cd.position;
         }
 
-         Debug.Log ("Updating player at " + cd.activeRegions + " --- " + cd.activeRegions.Count);
-        
+//          Debug.Log ("Updating player at " + cd.activeRegions + " --- " + cd.activeRegions.Count);
         
         // Send updates for those regions on the list who have changed since the last update timestamp.
         foreach (AccessedRegion ar in cd.activeRegions)
         {
             if (ar.timeLastUpdate < ar.region.timeLastChanged)
             {
-               Debug.Log ("Updating player at " + ar.timeLastUpdate + " - " + ar.region.timeLastChanged);            
+//                Debug.Log ("Updating player at " + ar.timeLastUpdate + " - " + ar.region.timeLastChanged);            
                 NetworkServer.SendToClient (connectionId, LevelMsgType.LevelResponse, ar.region); 
                 // update timestamp.
                 ar.timeLastUpdate = Time.time;
@@ -528,29 +572,27 @@ public class WorldManager : NetworkBehaviour {
         switch (netMsg.msgType)
         {
             case LevelMsgType.LevelRequest:
+                /// Player has notified of current position. Check to see if regions of interest
+                /// need to be updated.
             {
                 LevelSyncMessage m = netMsg.ReadMessage<LevelSyncMessage>();
-                Debug.Log ("Got message: " + m.message + " : " + netMsg.conn.connectionId + " : ");                
+                Debug.Log ("Got message: " + netMsg.conn.connectionId + " : ");                
                 
                 sendPlayerUpdate (netMsg.conn.connectionId, m.playerPosition, m.visibleRadius);
                 
                 updatePlayerProxy (netMsg.conn.connectionId);
-                
-/*                MessageBase nm = levelStructure.getRegion (m.playerPosition.x, m.playerPosition.z);
-                if (nm != null)
-                {
-                    NetworkServer.SendToClient (netMsg.conn.connectionId, LevelMsgType.LevelResponse, nm); 
-                }*/
-                
             }
             break;
+            
             case LevelMsgType.LevelUpdate:
+                /// Player has changed the level in a way that affects other players.
             {
                 Debug.Log ("Changed level");
                 BlockAddMessage m = netMsg.ReadMessage<BlockAddMessage>();
                 levelStructure.setBlock (m.px + 0.5f, m.pz + 0.5f);
             }
             break;
+            
             default:
             {
                 Debug.Log ("Unexpected message type");

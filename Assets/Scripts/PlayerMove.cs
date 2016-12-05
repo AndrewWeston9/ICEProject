@@ -8,6 +8,10 @@ public class PlayerMove : NetworkBehaviour
     /// queried for any player control operations.
     protected LocalWorld localWorld;
     
+    /// Manage when a block is attached to an edge of the world.
+    protected bool attached;
+    protected Vector3 attachPoint;
+    
     /// Access method used when the local world registers itself
     /// with this player object.
     public void setLocalWorld (LocalWorld lw)
@@ -18,6 +22,7 @@ public class PlayerMove : NetworkBehaviour
     
     /// Actions on each update of the player:
     ///   - handle key presses
+    ///   - check that the player stays in a valid region.
     void Update()
     {
         if (!isLocalPlayer)
@@ -26,17 +31,24 @@ public class PlayerMove : NetworkBehaviour
 
         }
         
-        /// Jump action.
-        var y = 0.0f;
-        if (Input.GetKeyDown(KeyCode.Space) && isGrounded ())
+        if (localWorld == null)
         {
-            y = 1.0f;
+          return;
         }
         
-        /// Place block action.
-        if (Input.GetKeyDown(KeyCode.LeftControl) && isGrounded ())
+        /// Jump action.
+        var y = 0.0f;
+        if (Input.GetKeyDown(KeyCode.Space) && (isGrounded () || attached))
         {
-            Vector3 playerpos = transform.position;
+            y = 1.0f;
+            attached = false;
+        }
+        
+        Vector3 playerpos = transform.position;
+        
+        /// Place block action.
+        if (Input.GetKeyDown(KeyCode.LeftControl) && (isGrounded () || attached))
+        {
             int px = (int) (playerpos.x + 0.5);
             int py = (int) playerpos.y;
             int pz = (int) (playerpos.z + 0.5);
@@ -45,7 +57,8 @@ public class PlayerMove : NetworkBehaviour
 
             y = 0.2f;
             transform.Translate(0, 1, 0);
-            
+
+            attached = false;
         }
         
         /// Turn and move forward.
@@ -58,6 +71,33 @@ public class PlayerMove : NetworkBehaviour
         
         Rigidbody rb = GetComponent<Rigidbody> ();
         rb.AddForce (80.0f * transform.up * y);
+        
+        /// Check that movement is allowed.
+        playerpos = transform.position;
+        if (playerpos.y < WorldManager.minLevelHeight - 0.5f/* && Input.GetKeyDown(KeyCode.RightControl)*/)
+        {
+          Debug.Log ("Fallen and can't get up: " + playerpos);
+          
+          // Find a block that the player can attach to.
+          Vector3 freepos;
+          bool found = localWorld.findNearestBlock (playerpos, out freepos);
+          if (found)
+          {
+            Debug.Log  ("Finding neighbour for: " + playerpos + " at " + freepos);
+            attachPoint  = freepos;
+            attached = true;
+          }
+          else
+          {
+            // emergency - no blocks available.
+          }
+        }
+        
+        if (attached)
+        {
+            transform.position = attachPoint;
+            rb.velocity = new Vector3 (0.0f, 0.0f, 0.0f);
+        }
     }
     
     /// Some actions are only allowed when the player is on the ground. This method

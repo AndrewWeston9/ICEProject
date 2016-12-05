@@ -174,11 +174,23 @@ public class RegionBlock : MessageBase
         }
     }
     
+    /// Get the value for the block at the given position.
+    /// Returns 0 for values out of range.
+    public int getBlock (int x, int y)
+    {
+        if ((x >= 0) && (x < blockSize) && 
+            (y >= 0) && (y < blockSize))
+        {
+            return blockStructure[getIndex (x, y)];
+        }
+        return 0;
+    }
+    
     /// Modify the scene to draw a brick at the given coordinates. Really nothing to do
     /// with a region block and could be transferred to an appropriate view class.
     public void placeSingleBlock (GameObject block, Vector2 position, Transform parentObjectTransform)
     {
-      Vector3 blockpos = new Vector3 (position.x, 2.0f, position.y);
+      Vector3 blockpos = new Vector3 (position.x, WorldManager.minLevelHeight, position.y);
       GameObject thisBrick = UnityEngine.Object.Instantiate (block, blockpos, Quaternion.identity);
       thisBrick.transform.SetParent (parentObjectTransform, false);
     }
@@ -438,6 +450,8 @@ public class WorldManager : NetworkBehaviour {
     /// representing the smallest chunk of a level which is shared.
     private int blockSize;
     
+    public const float minLevelHeight = 2.0f;
+    
     // Use this for initialization
     void Start () {
         blockSize = 10;
@@ -576,7 +590,7 @@ public class WorldManager : NetworkBehaviour {
                 /// need to be updated.
             {
                 LevelSyncMessage m = netMsg.ReadMessage<LevelSyncMessage>();
-                Debug.Log ("Got message: " + netMsg.conn.connectionId + " : ");                
+//                 Debug.Log ("Got message: " + netMsg.conn.connectionId + " : ");                
                 
                 sendPlayerUpdate (netMsg.conn.connectionId, m.playerPosition, m.visibleRadius);
                 

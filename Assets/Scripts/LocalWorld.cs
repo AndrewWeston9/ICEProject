@@ -70,7 +70,7 @@ public class LocalWorld : NetworkBehaviour {
     
     /// Identify the level block corresponding to a particular position.
     /// May return null if no such block is cached locally.
-    LocalLevelBlock findLevelBlock (Vector3 position)
+    public LocalLevelBlock findLevelBlock (Vector3 position)
     {
         foreach (LocalLevelBlock i in levelStructure)
         {
@@ -82,21 +82,38 @@ public class LocalWorld : NetworkBehaviour {
         return null;
     }
     
+    /// Return the value of the cell at the given position. Returns
+    /// false if no cell exists within the local cache.
+    public bool findBlock (Vector3 position, out int value)
+    {
+        LocalLevelBlock llb = findLevelBlock (position);
+        if (llb != null)
+        {
+          int rx = (int) (position.x - llb.region.blockCoordX);
+          int ry = (int) (position.z - llb.region.blockCoordY);
+        
+          value = llb.region.getBlock (rx, ry);
+          return true; 
+        }
+        value = 0;
+        return false;
+    }
+    
     /// Create a level block corresponding to the given region block and
     /// add this to the cache of blocks. Assumes that such a block does
     /// not already exist, or a duplicate will be created.
-    LocalLevelBlock addLevelBlock (RegionBlock rb, Vector3 position)
+    public LocalLevelBlock addLevelBlock (RegionBlock rb, Vector3 position)
     {
 //         Debug.Log ("New local block " + position);
         LocalLevelBlock llb = new LocalLevelBlock ();
         llb.region = rb;
-        llb.gobject = Object.Instantiate (localLevelElement, position, Quaternion.identity);
+        llb.gobject = UnityEngine.Object.Instantiate (localLevelElement, position, Quaternion.identity);
         levelStructure.Add (llb);
         return llb;
     }                    
     
     /// Remove any cached region blocks that are outside the visible region.
-    void flushRegions ()
+    private void flushRegions ()
     {
         NetworkManager nm = NetworkManager.singleton;
         if (nm.client != null)
@@ -229,5 +246,68 @@ public class LocalWorld : NetworkBehaviour {
         m.px = x;
         m.pz = z;
         NetworkManager.singleton.client.Send (LevelMsgType.LevelUpdate, m);        
+    }
+    
+    /// Check the neighbouring blocks to see if there is an attachment candidate available.
+    /// If so, return the height of that neighbour. 
+    private bool validNearestBlockCandidate (int x, int z, out int y)
+    {
+        
+        y = 0;
+        int [] offx = { -1, -1 , -1, 0, 1, 1, 1, 0 };
+        int [] offz = {  1, 0 , -1, -1, -1, 0, 1, 1 };
+        for (int i = 0; i < 8; i++)
+        {
+          int value;
+          bool hasValue = findBlock (new Vector3 (x + offx[i], 0.0f, z + offz[i]), out value);
+          if (hasValue && (value == 1))
+          {
+              y = (int) WorldManager.minLevelHeight;
+              return true;
+          }
+        }
+        return false;
+    }
+    
+    /// Find the open position next to a block nearest the given position. 
+    public bool findNearestBlock (Vector3 position, out Vector3 availablePosition)
+    {
+        int r = 0;
+        // search in increasing radius about the player.
+        while (r < viewRadius)
+        {
+            // scan in a ring of the given radius r.
+            for (int offset = 0; offset <= r; offset++)
+            {
+                int cx;
+                int cz;
+                int cy;
+                
+                // search coordinates for a square ring.
+                int [] offxfixed    = { -1, -1, +1, +1,  0,  0,  0,  0  };
+                int [] offxvariable = {  0,  0,  0,  0,  -1, +1, -1, +1  };
+                int [] offzfixed    = {  0,  0,  0,  0,  -1, -1, +1, +1 };
+                int [] offzvariable = { -1, +1, -1, +1,   0,  0,  0,  0 };
+                for (int i = 0; i < 8; i++)
+                {
+                    cx = offxfixed[i] * r + offxvariable[i] * offset + (int) (position.x + 0.5f);
+                    cz = offzfixed[i] * r + offzvariable[i] * offset + (int) (position.z + 0.5f);
+                    
+                    /// Check if the current block is an appropriate candidate. We assume this is empty
+                    /// since it would have been previously checked as being a potential neighbour 
+                    /// candidate. So just check to see if this has a valid neighbour, and get the height 
+                    /// of the neighbouring block if it exists.
+                    if (validNearestBlockCandidate (cx, cz, out cy))
+                    {
+                        availablePosition = new Vector3 (cx, cy, cz);
+                        return true;
+                    }
+                }
+            }
+            r++;
+        }
+        // No block found.
+        availablePosition = new Vector3 (0.0f, 0.0f, 0.0f);
+        return false;
     }
 }

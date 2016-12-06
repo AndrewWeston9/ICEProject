@@ -254,9 +254,17 @@ public class LocalWorld : NetworkBehaviour {
     {
         
         y = 0;
-        int [] offx = { -1, -1 , -1, 0, 1, 1, 1, 0 };
-        int [] offz = {  1, 0 , -1, -1, -1, 0, 1, 1 };
-        for (int i = 0; i < 8; i++)
+        
+        /// Include diagonal neighbours.
+        //int [] offx = { -1, -1 , -1, 0, 1, 1, 1, 0 };
+        //int [] offz = {  1, 0 , -1, -1, -1, 0, 1, 1 };
+        
+        /// Only 4 neighbours that share a side.
+        int [] offx = {  -1 , 0, 1, 0 };
+        int [] offz = {  0 , -1, 0, 1 };
+        
+        int numberNeighbours = offx.Length;
+        for (int i = 0; i < numberNeighbours; i++)
         {
           int value;
           bool hasValue = findBlock (new Vector3 (x + offx[i], 0.0f, z + offz[i]), out value);

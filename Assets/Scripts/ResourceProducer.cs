@@ -23,43 +23,11 @@ public class ResourceProducer : MonoBehaviour {
     /// The index identifying the particular resource type as defined by GloopResources.
     public int resourceType;
     
-    void OnTriggerStay (Collider collision)
-    {
-        var hit = collision.transform.parent.gameObject; // if hitting a player shape, get the player (parent).
-        var playerState = hit.GetComponent<PlayerState>();
-//         Debug.Log ("Collision " + hit + " " + playerState + ";");
-        if (playerState != null)
-        {
-            float amountHarvested = harvestRate * Time.deltaTime;
-            amountHarvested = Math.Min (resourceAmount, amountHarvested);
-            playerState.changeResource (resourceType, amountHarvested);
-            
-            // Note: resource depleted even if the player doesn't benefit. Reduce
-            // the amount harvested by the amount the player has taken if there is
-            // a need to change this behaviour.
-            
-            resourceAmount -= amountHarvested;
-            if (resourceAmount > maximumResourceLevel)
-            {
-                resourceAmount = maximumResourceLevel;
-            }
-//             Debug.Log ("Res: " + resourceAmount);
-            if (resourceAmount <= 0.0f)
-            {
-                resourceAmount = 0.0f;
-                if (removeWhenEmpty)
-                {
-//                     Debug.Log ("Dest");
-                    UnityEngine.Object.Destroy(gameObject);
-                }
-            }
-            
-        }
-    }
+    /// Link to details about various resource types.
+    private GameObject gameGlobals = null;
     
-    void Update() 
+    private void updateResourceLevels ()
     {
-        resourceAmount += resourceProductionRate * Time.deltaTime;
         if (resourceAmount > maximumResourceLevel)
         {
             resourceAmount = maximumResourceLevel;
@@ -72,5 +40,42 @@ public class ResourceProducer : MonoBehaviour {
                 UnityEngine.Object.Destroy(gameObject);
             }
         }
+        
+        if (gameGlobals == null)
+        {
+            gameGlobals = GameObject.Find("GameGlobals");
+            gameObject.GetComponent<MeshRenderer>().material = gameGlobals.GetComponent<GloopResources>().resourceMaterials[resourceType];
+        }
+        if (gameGlobals != null)
+        {
+            Color c = gameObject.GetComponent<MeshRenderer>().material.color;
+            c.a = resourceAmount;
+            gameObject.GetComponent<MeshRenderer>().material.color = c;
+        }
+    }
+    
+    void OnTriggerStay (Collider collision)
+    {
+        var hit = collision.transform.parent.gameObject; // if hitting a player shape, get the player (parent).
+        var playerState = hit.GetComponent<PlayerState>();
+        if (playerState != null)
+        {
+            float amountHarvested = harvestRate * Time.deltaTime;
+            amountHarvested = Math.Min (resourceAmount, amountHarvested);
+            playerState.changeResource (resourceType, amountHarvested);
+            
+            // Note: resource depleted even if the player doesn't benefit. Reduce
+            // the amount harvested by the amount the player has taken if there is
+            // a need to change this behaviour.
+            
+            resourceAmount -= amountHarvested;
+            updateResourceLevels ();
+        }
+    }
+    
+    void Update() 
+    {
+        resourceAmount += resourceProductionRate * Time.deltaTime;
+        updateResourceLevels ();
     }
 }

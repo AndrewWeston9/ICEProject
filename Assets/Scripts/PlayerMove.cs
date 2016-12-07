@@ -76,7 +76,7 @@ public class PlayerMove : NetworkBehaviour
         playerpos = transform.position;
         if (playerpos.y < WorldManager.minLevelHeight - 0.5f/* && Input.GetKeyDown(KeyCode.RightControl)*/)
         {
-          Debug.Log ("Fallen and can't get up: " + playerpos);
+//           Debug.Log ("Fallen and can't get up: " + playerpos);
           
           // Find a block that the player can attach to.
           Vector3 freepos;

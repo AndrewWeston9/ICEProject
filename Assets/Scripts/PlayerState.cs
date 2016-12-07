@@ -8,8 +8,10 @@ public class PlayerState : NetworkBehaviour {
     
     private const float barSize = 0.2f;
     
-    [SyncVar(hook = "OnChangeResourceLevels")]
+//     [SyncVar(hook = "OnChangeResourceLevels")]
     public SyncListFloat resourceLevels = new SyncListFloat ();
+    [SyncVar(hook = "OnChangeResources")]
+    private bool resourceChanged;
     
     /// The prefab for components used to display resource levels.
     public GameObject resourceDisplayElement;
@@ -26,35 +28,48 @@ public class PlayerState : NetworkBehaviour {
         OnChangeResourceLevels (resourceLevels);
     }
     
-/*    
-    
-    public void TakeDamage(int amount)
+    public void changeResource (int resourceType, float deltaResource)
     {
         if (!isServer)
+        {
             return;
+        }
         
-        //         currentState -= amount;
-        //         if (currentState <= 0)
-        //         {
-        // //             currentState = maxState;
-        // 
-        //             // called on the Server, but invoked on the Clients
-        //             RpcRespawn();
-        //         }
-    }*/
-    
+        resourceLevels[resourceType] += deltaResource;
+        
+        if (resourceLevels[resourceType] > 1.0f)
+        {
+            resourceLevels[resourceType] = 1.0f;
+        }
+        
+        resourceChanged = !resourceChanged;
+        Debug.Log ("Changed " + this);
+    }
+
+    void OnChangeResources (bool changed)
+    {
+                Debug.Log ("Refreshfix");
+        OnChangeResourceLevels (resourceLevels);
+    }
+
 //       void OnGUI() {
 //           Debug.Log ("Updating resource");
 //           GUI.DrawTexture(new Rect(10, 10, 60, 60), aTexture, ScaleMode.ScaleToFit, true, 10.0F);
 //       }
     void OnChangeResourceLevels (SyncListFloat resourceLevels )
     {
+                Debug.Log ("Refresh");
+        if (!isLocalPlayer)
+        {
+            return;
+        }
+                
         // Initialize objects for the resource bar.
         if (resourceDisplayObjects == null)
         {
             /// The object under which resource display elements are shown.
             GameObject resourceAreaDisplay = GameObject.Find("ResourceAreaDisplay");
-            GameObject worldManager = GameObject.Find("WorldManager");
+            GameObject gameGlobals = GameObject.Find("GameGlobals");
 
             resourceDisplayObjects = new GameObject [GloopResources.NumberOfResources];
             for (int i = 0; i < GloopResources.NumberOfResources; i++)
@@ -62,7 +77,7 @@ public class PlayerState : NetworkBehaviour {
               GameObject go = UnityEngine.Object.Instantiate (resourceDisplayElement, new Vector3 (0, 0, 0), Quaternion.identity);
               resourceDisplayObjects[i] = go;
               resourceDisplayObjects[i].transform.SetParent (resourceAreaDisplay.transform, false);
-              resourceDisplayObjects[i].GetComponent<MeshRenderer>().material = worldManager.GetComponent<GloopResources>().resourceMaterials[i];
+              resourceDisplayObjects[i].GetComponent<MeshRenderer>().material = gameGlobals.GetComponent<GloopResources>().resourceMaterials[i];
             }
         }
         
@@ -78,13 +93,4 @@ public class PlayerState : NetworkBehaviour {
         }
     }
     
-//     [ClientRpc]
-//     void RpcRespawn()
-//     {
-//         if (isLocalPlayer)
-//         {
-//             // move back to zero location
-//             transform.position = Vector3.zero;
-//         }
-//     }
 }

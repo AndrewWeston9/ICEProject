@@ -37,7 +37,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1012833729504368}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 2, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -92,10 +92,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 23f87b00aae8347d295eb1b31d8031d8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mapPattern: {fileID: 2800000, guid: 1520ad0cf92194a6585060fc8010ad4b, type: 3}
-  localLevelPrefab: {fileID: 0}
-  regionBlank: {fileID: 0}
-  playerProxy: {fileID: 0}
+  mapPattern: {fileID: 2800000, guid: 6fcf2e15a4bc24dabb7e31fce54456f0, type: 3}
+  localLevelPrefab: {fileID: 1593302540197858, guid: 9a0fc4981381a48c6ac89ed54571612d,
+    type: 2}
+  regionBlank: {fileID: 1257754400744154, guid: bc916990534d24d8c9be9721ed068aa1,
+    type: 2}
+  playerProxy: {fileID: 1493370186126320, guid: 7d3ee2dd31d494e28ab5b0e87260beb9,
+    type: 2}
 --- !u!114 &114427874652733858
 MonoBehaviour:
   m_ObjectHideFlags: 1

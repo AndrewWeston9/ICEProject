@@ -1,0 +1,76 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using System;
+
+public class ResourceProducer : MonoBehaviour {
+    
+    /// Amount of resource currently available.
+    public float resourceAmount;
+    
+    /// Production rate for resource.
+    public float resourceProductionRate;
+    
+    /// Harvest rate for resource - proportion of maximum consumed per second.
+    public float harvestRate;
+    
+    /// Capacity of resource producer - maximum amount that can be present.
+    public float maximumResourceLevel;
+    
+    /// Remove this producer when the resource level reaches zero.
+    public bool removeWhenEmpty;
+    
+    /// The index identifying the particular resource type as defined by GloopResources.
+    public int resourceType;
+    
+    void OnTriggerStay (Collider collision)
+    {
+        var hit = collision.transform.parent.gameObject; // if hitting a player shape, get the player (parent).
+        var playerState = hit.GetComponent<PlayerState>();
+//         Debug.Log ("Collision " + hit + " " + playerState + ";");
+        if (playerState != null)
+        {
+            float amountHarvested = harvestRate * Time.deltaTime;
+            amountHarvested = Math.Min (resourceAmount, amountHarvested);
+            playerState.changeResource (resourceType, amountHarvested);
+            
+            // Note: resource depleted even if the player doesn't benefit. Reduce
+            // the amount harvested by the amount the player has taken if there is
+            // a need to change this behaviour.
+            
+            resourceAmount -= amountHarvested;
+            if (resourceAmount > maximumResourceLevel)
+            {
+                resourceAmount = maximumResourceLevel;
+            }
+//             Debug.Log ("Res: " + resourceAmount);
+            if (resourceAmount <= 0.0f)
+            {
+                resourceAmount = 0.0f;
+                if (removeWhenEmpty)
+                {
+//                     Debug.Log ("Dest");
+                    UnityEngine.Object.Destroy(gameObject);
+                }
+            }
+            
+        }
+    }
+    
+    void Update() 
+    {
+        resourceAmount += resourceProductionRate * Time.deltaTime;
+        if (resourceAmount > maximumResourceLevel)
+        {
+            resourceAmount = maximumResourceLevel;
+        }
+        if (resourceAmount <= 0.0f)
+        {
+            resourceAmount = 0.0f;
+            if (removeWhenEmpty)
+            {
+                UnityEngine.Object.Destroy(gameObject);
+            }
+        }
+    }
+}

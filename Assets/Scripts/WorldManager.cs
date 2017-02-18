@@ -7,8 +7,18 @@ using System;
 
 /// Represents a square block of the level, intended for
 /// sharing over the network. 
+/// Update: region blocks now contain voxel desriptions. 
+/// The x and y axes will be assumed to be the horizontal
+/// directions, and the z axis represents the vertical component.
+/// The horizontal directions are determined dynamically to be
+/// equal and set by the block size. The vertical dimension is
+/// currently a constant value.
+/// Blocks only stack horizontally, each RegionBlock represents the
+/// full height of the level.
 public class RegionBlock : MessageBase
 {
+    public const int MaxBlockHeight = 10;
+
     public int blockCoordX;
     public int blockCoordY;
     public int blockSize;
@@ -25,11 +35,12 @@ public class RegionBlock : MessageBase
     }
     
     /// Utility function - get the index of the block element
-    /// at coordinates (x, y) in the RegionBlock (requires 
+    /// at coordinates (x, y, z) in the RegionBlock (requires 
     /// valid value for blockSize).
-    public int getIndex (int x, int y)
+    public int getIndex (int x, int y, int z)
     {
-        return y * blockSize + x;
+       // Debug.Log ("index for " + x + " " + y + " " + z);
+        return (y * blockSize + x) * blockSize + z;
     }
     
     /// Return the coordinates of the block in the world.
@@ -75,7 +86,7 @@ public class RegionBlock : MessageBase
         blockCoordY = y;
         
         blockSize = mblockSize;
-        blockStructure = new int [blockSize * blockSize];
+        blockStructure = new int [blockSize * blockSize * MaxBlockHeight];
         for (int i = 0; i < blockSize; i += 1)
         {
             for (int j = 0; j < blockSize; j += 1)
@@ -84,13 +95,19 @@ public class RegionBlock : MessageBase
                 int yc = blockCoordY + j;
                 xc = Math.Max (0, Math.Min (levelPattern.width, xc));
                 yc = Math.Max (0, Math.Min (levelPattern.height, yc));
-                if (levelPattern.GetPixel (xc, yc).r != 0)
+                int zc = (int) (levelPattern.GetPixel (xc, yc).r * (float) MaxBlockHeight);
+//                 Debug.Log ("Height: " + levelPattern.GetPixel (xc, yc).r + " " + zc);
+
+                for (int k = 0; k < MaxBlockHeight; k += 1)
                 {
-                    blockStructure[getIndex (i, j)] = 1;
-                }
-                else
-                {
-                    blockStructure[getIndex (i, j)] = 0;
+                    if (k < zc)
+                    {
+                        blockStructure[getIndex (i, j, k)] = 1;
+                    }
+                    else
+                    {
+                        blockStructure[getIndex (i, j, k)] = 0;
+                    }
                 }
             }
         }
@@ -99,24 +116,29 @@ public class RegionBlock : MessageBase
     
     /// Produce a simplified mesh representation. Scales the region block to fit completely into
     /// a unit square.
+    /// Minor update to voxel structure, but deprecated.
     public void convertToMesh (Mesh mesh)
     {
         mesh.Clear ();
         
         int xdim = blockSize;
         int ydim = blockSize;
+        int zdim = MaxBlockHeight;
         
-        Vector3 [] vertices = new Vector3[(xdim + 1) * (ydim + 1)];
-        Vector3 [] normals = new Vector3[(xdim + 1) * (ydim + 1)];
-        Vector2 [] uv = new Vector2[(xdim + 1) * (ydim + 1)];
+        Vector3 [] vertices = new Vector3[(xdim + 1) * (ydim + 1) * (zdim + 1)];
+        Vector3 [] normals = new Vector3[(xdim + 1) * (ydim + 1) * (zdim + 1)];
+        Vector2 [] uv = new Vector2[(xdim + 1) * (ydim + 1) * (zdim + 1)];
         
         for (int i = 0; i <= xdim; i += 1)
         {
             for (int j = 0; j <= ydim; j += 1)
             {
-                vertices[j * (ydim + 1) + i] = new Vector3 ((float) i / xdim, (float) j / ydim, 0.0f);
-                normals[j * (ydim + 1) + i] = -Vector3.forward;
-                uv[j * (ydim + 1) + i] = new Vector2((float) i / xdim, (float) j / ydim);
+                for (int k = 0; k <= zdim; k += 1)
+                {
+                    vertices[(j * (ydim + 1) + i) * (xdim + 1) + k] = new Vector3 ((float) i / xdim, (float) j / ydim, (float) k / zdim);
+                    normals[(j * (ydim + 1) + i) * (xdim + 1) + k] = -Vector3.forward;
+                    uv[(j * (ydim + 1) + i) * (xdim + 1) + k] = new Vector2((float) i / xdim, (float) j / ydim);
+                }
             }
         }
         
@@ -131,9 +153,12 @@ public class RegionBlock : MessageBase
         {
             for (int j = 0; j < ydim; j += 1)
             {
-                if (blockStructure[getIndex (i, j)] == 1)
+                for (int k = 0; k < zdim; k += 1)
                 {
-                    blockSurfaces++;
+                    if (blockStructure[getIndex (i, j, k)] == 1)
+                    {
+                        blockSurfaces++;
+                    }
                 }
             }
         }
@@ -144,17 +169,20 @@ public class RegionBlock : MessageBase
         {
             for (int j = 0; j < ydim; j += 1)
             {
-                if (blockStructure[getIndex (i, j)] == 1)
+                for (int k = 0; k < zdim; k += 1)
                 {
-                    //  Lower left triangle.
-                    tri[tricount++] = (j + 0) * (ydim + 1) + (i + 0);
-                    tri[tricount++] = (j + 1) * (ydim + 1) + (i + 0);
-                    tri[tricount++] = (j + 1) * (ydim + 1) + (i + 1);
-                    
-                    //  Upper right triangle.   
-                    tri[tricount++] = (j + 0) * (ydim + 1) + (i + 0);
-                    tri[tricount++] = (j + 1) * (ydim + 1) + (i + 1);
-                    tri[tricount++] = (j + 0) * (ydim + 1) + (i + 1);
+                    if (blockStructure[getIndex (i, j, k)] == 1)
+                    {
+                        //  Lower left triangle.
+                        tri[tricount++] = ((j + 0) * (ydim + 1) + (i + 0)) * (xdim + 1) + (k + 0);
+                        tri[tricount++] = ((j + 1) * (ydim + 1) + (i + 0)) * (xdim + 1) + (k + 0);
+                        tri[tricount++] = ((j + 1) * (ydim + 1) + (i + 1)) * (xdim + 1) + (k + 0);
+                        
+                        //  Upper right triangle.   
+                        tri[tricount++] = ((j + 0) * (ydim + 1) + (i + 0)) * (xdim + 1) + (k + 0);
+                        tri[tricount++] = ((j + 1) * (ydim + 1) + (i + 1)) * (xdim + 1) + (k + 0);
+                        tri[tricount++] = ((j + 0) * (ydim + 1) + (i + 1)) * (xdim + 1) + (k + 0);
+                    }
                 }
             }
         }
@@ -163,34 +191,36 @@ public class RegionBlock : MessageBase
     
     /// Modify the level by making a block appear at (x,y). These
     /// coordinates are relative to this RegionBlock.
-    public void setBlock (int x, int y)
+    public void setBlock (int x, int y, int z)
     {
         if ((x >= 0) && (x < blockSize) && 
-            (y >= 0) && (y < blockSize))
+            (y >= 0) && (y < blockSize) &&
+            (z >= 0) && (z < MaxBlockHeight))
         {
-            blockStructure[getIndex (x, y)] = 1;
-//              Debug.Log ("Setting " + x + " " + y);
+            blockStructure[getIndex (x, y, z)] = 1;
+//              Debug.Log ("Setting " + x + " " + y + " " + z);
             updateTimeStamp ();
         }
     }
     
     /// Get the value for the block at the given position.
     /// Returns 0 for values out of range.
-    public int getBlock (int x, int y)
+    public int getBlock (int x, int y, int z)
     {
         if ((x >= 0) && (x < blockSize) && 
-            (y >= 0) && (y < blockSize))
+            (y >= 0) && (y < blockSize) &&
+            (z >= 0) && (z < MaxBlockHeight))
         {
-            return blockStructure[getIndex (x, y)];
+            return blockStructure[getIndex (x, y, z)];
         }
         return 0;
     }
     
     /// Modify the scene to draw a brick at the given coordinates. Really nothing to do
     /// with a region block and could be transferred to an appropriate view class.
-    public void placeSingleBlock (GameObject block, Vector2 position, Transform parentObjectTransform)
+    public void placeSingleBlock (GameObject block, Vector3 position, Transform parentObjectTransform)
     {
-      Vector3 blockpos = new Vector3 (position.x, WorldManager.minLevelHeight, position.y);
+      Vector3 blockpos = new Vector3 (position.x, position.z, position.y);
       GameObject thisBrick = UnityEngine.Object.Instantiate (block, blockpos, Quaternion.identity);
       thisBrick.transform.SetParent (parentObjectTransform, false);
     }
@@ -212,11 +242,14 @@ public class RegionBlock : MessageBase
             for (int j = 0; j < blockSize; j += 1)
             {
                 //                   Debug.Log ("Block at " + i + " , " + j + " ==" + blockStructure[getIndex (i, j)] + " - " + timeLastChanged);
-                if (blockStructure[getIndex (i, j)] == 1)
+                for (int k = 0; k < MaxBlockHeight; k += 1)
                 {
-                    Vector3 pos = new Vector2 (i, j);
-                    placeSingleBlock (block, pos, parentObjectTransform);
-                    //                   Debug.Log ("Block at " + i + " , " + j);
+                    if (blockStructure[getIndex (i, j, k)] == 1)
+                    {
+                        Vector3 pos = new Vector3 (i, j, k);
+                        placeSingleBlock (block, pos, parentObjectTransform);
+                        //                   Debug.Log ("Block at " + i + " , " + j);
+                    }
                 }
             }
         }
@@ -324,16 +357,17 @@ public class LevelStructure
     }
     
     /// Place a block at the given coordinates, relative to the entire level itself.
-    public void setBlock (float x, float y)
+    public void setBlock (float x, float y, float z)
     {
         int rx = ((int) x) % blockSize;
         int ry = ((int) y) % blockSize;
+        int rz = ((int) z);
         
         RegionBlock rb = getRegion (x, y);
         
         if (rb != null)
         {
-            rb.setBlock (rx, ry);
+            rb.setBlock (rx, ry, rz);
         }
         
         refreshMesh ();
@@ -603,7 +637,8 @@ public class WorldManager : NetworkBehaviour {
             {
                 Debug.Log ("Changed level");
                 BlockAddMessage m = netMsg.ReadMessage<BlockAddMessage>();
-                levelStructure.setBlock (m.px + 0.5f, m.pz + 0.5f);
+                // FIXME: place block at appropriate height.
+                levelStructure.setBlock (m.px + 0.5f, m.pz + 0.5f, 3);
             }
             break;
             

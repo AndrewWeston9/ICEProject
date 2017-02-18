@@ -91,8 +91,9 @@ public class LocalWorld : NetworkBehaviour {
         {
           int rx = (int) (position.x - llb.region.blockCoordX);
           int ry = (int) (position.z - llb.region.blockCoordY);
-        
-          value = llb.region.getBlock (rx, ry);
+          int rz = (int) (position.y);
+          
+          value = llb.region.getBlock (rx, ry, rz);
           return true; 
         }
         value = 0;

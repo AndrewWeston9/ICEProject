@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using UnityEngine.Networking;
 
+using System;
+
 /// Player object management.
 public class PlayerMove : NetworkBehaviour
 {
@@ -50,10 +52,11 @@ public class PlayerMove : NetworkBehaviour
         if (Input.GetKeyDown(KeyCode.LeftControl) && (isGrounded () || attached))
         {
             int px = (int) (playerpos.x + 0.5);
-            int py = (int) playerpos.y;
+            int py = Math.Max ((int) (playerpos.y), (int) WorldManager.minLevelHeight);
             int pz = (int) (playerpos.z + 0.5);
             
-            localWorld.placeBlock (px, pz);
+            Debug.Log ("place at " + px + " " + pz + " " + py);
+            localWorld.placeBlock (px, pz, py);
 
             y = 0.2f;
             transform.Translate(0, 1, 0);

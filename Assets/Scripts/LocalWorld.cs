@@ -20,6 +20,8 @@ class BlockAddMessage : MessageBase
 {
     public float px;
     public float pz;
+    
+    public float height;
 }
 
 /// A local level block represents a component of the environment
@@ -191,7 +193,7 @@ public class LocalWorld : NetworkBehaviour {
                 rb.convertToMesh (mf.mesh);        
                 
                 Vector2 rbpos = rb.getPosition ();
-                Vector3 llbpos = new Vector3 (rbpos.x, 0.0f, rbpos.y);
+                Vector3 llbpos = new Vector3 (rbpos.x, WorldManager.minLevelHeight, rbpos.y);
                 LocalLevelBlock llb = findLevelBlock (llbpos);
                 if (llb == null)
                 {
@@ -226,15 +228,19 @@ public class LocalWorld : NetworkBehaviour {
     // Add a new block at the given position. The intent is to allow players to immediately
     // reflect actions in the local game, which may eventually be replaced when the update
     // is returned from the server.
-    public void placeBlock (float x, float z)
+    public void placeBlock (float x, float z, float height)
     {
+        // Coordinates for the region block - only horizontal elements.
         Vector3 llbpos = new Vector3 (x, 0.0f, z);
         LocalLevelBlock llb = findLevelBlock (llbpos);
+        
+        int blockHeight = (int) (height - WorldManager.minLevelHeight);
         if (llb != null)
         {
-            Vector3 regionpos = new Vector3 (x - llb.region.blockCoordX, z - llb.region.blockCoordY);
+            Vector3 regionpos = new Vector3 (x - llb.region.blockCoordX, z - llb.region.blockCoordY, blockHeight);
             // llb should now be valid.
-            llb.region.placeSingleBlock (localBrick, regionpos, llb.gobject.transform);
+            // Make a local copy before signalling the change to the world.
+//            llb.region.placeSingleBlock (localBrick, regionpos, llb.gobject.transform);
         }
         else
             // else no region - potential problem.
@@ -243,15 +249,17 @@ public class LocalWorld : NetworkBehaviour {
         }
         
         
+        Debug.Log ("Add at " + x + " " + z + "    " + blockHeight);
         BlockAddMessage m = new BlockAddMessage ();
         m.px = x;
         m.pz = z;
+        m.height = blockHeight;
         NetworkManager.singleton.client.Send (LevelMsgType.LevelUpdate, m);        
     }
     
     /// Check the neighbouring blocks to see if there is an attachment candidate available.
     /// If so, return the height of that neighbour. 
-    private bool validNearestBlockCandidate (int x, int z, out int y)
+    private bool validNearestBlockCandidate (int x, int z, int height, out int y)
     {
         
         y = 0;
@@ -268,10 +276,11 @@ public class LocalWorld : NetworkBehaviour {
         for (int i = 0; i < numberNeighbours; i++)
         {
           int value;
-          bool hasValue = findBlock (new Vector3 (x + offx[i], 0.0f, z + offz[i]), out value);
+          bool hasValue = findBlock (new Vector3 (x + offx[i], height, z + offz[i]), out value);
           if (hasValue && (value == 1))
           {
-              y = (int) WorldManager.minLevelHeight;
+//              y = (int) WorldManager.minLevelHeight;
+              y = height;
               return true;
           }
         }
@@ -301,14 +310,15 @@ public class LocalWorld : NetworkBehaviour {
                 {
                     cx = offxfixed[i] * r + offxvariable[i] * offset + (int) (position.x + 0.5f);
                     cz = offzfixed[i] * r + offzvariable[i] * offset + (int) (position.z + 0.5f);
+                    int height = 0;
                     
                     /// Check if the current block is an appropriate candidate. We assume this is empty
                     /// since it would have been previously checked as being a potential neighbour 
                     /// candidate. So just check to see if this has a valid neighbour, and get the height 
                     /// of the neighbouring block if it exists.
-                    if (validNearestBlockCandidate (cx, cz, out cy))
+                    if (validNearestBlockCandidate (cx, cz, height, out cy))
                     {
-                        availablePosition = new Vector3 (cx, cy, cz);
+                        availablePosition = new Vector3 (cx, cy + WorldManager.minLevelHeight, cz);
                         return true;
                     }
                 }

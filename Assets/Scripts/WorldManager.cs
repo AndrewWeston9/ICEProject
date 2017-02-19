@@ -218,6 +218,8 @@ public class RegionBlock : MessageBase
     
     /// Modify the scene to draw a brick at the given coordinates. Really nothing to do
     /// with a region block and could be transferred to an appropriate view class.
+    /// Coordinates given are the coordinates relative to the parent transformation for this region. 
+    /// Currently the y axis is up, x and z are the two horizontal directions.
     public void placeSingleBlock (GameObject block, Vector3 position, Transform parentObjectTransform)
     {
       Vector3 blockpos = new Vector3 (position.x, position.z, position.y);
@@ -637,8 +639,7 @@ public class WorldManager : NetworkBehaviour {
             {
                 Debug.Log ("Changed level");
                 BlockAddMessage m = netMsg.ReadMessage<BlockAddMessage>();
-                // FIXME: place block at appropriate height.
-                levelStructure.setBlock (m.px + 0.5f, m.pz + 0.5f, 3);
+                levelStructure.setBlock (m.px + 0.5f, m.pz + 0.5f, m.height);
             }
             break;
             

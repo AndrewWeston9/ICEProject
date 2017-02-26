@@ -21,12 +21,14 @@ public class PlayerMove : NetworkBehaviour
       localWorld = lw;
 //       Debug.Log ("Add block " + localWorld); 
     }
-    
+
     /// Actions on each update of the player:
     ///   - handle key presses
     ///   - check that the player stays in a valid region.
     void Update()
     {
+        Debug.Log ("Player update - " + isLocalPlayer + " - " + localWorld);
+        
         if (!isLocalPlayer)
         {
             return;

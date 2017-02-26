@@ -135,7 +135,7 @@ public class RegionBlock : MessageBase
             {
                 for (int k = 0; k <= zdim; k += 1)
                 {
-                    vertices[(j * (ydim + 1) + i) * (xdim + 1) + k] = new Vector3 ((float) i / xdim, (float) j / ydim, (float) k / zdim);
+                    vertices[(j * (ydim + 1) + i) * (xdim + 1) + k] = new Vector3 ((float) i / xdim, (float) j / ydim, (float) -k / zdim);
                     normals[(j * (ydim + 1) + i) * (xdim + 1) + k] = -Vector3.forward;
                     uv[(j * (ydim + 1) + i) * (xdim + 1) + k] = new Vector2((float) i / xdim, (float) j / ydim);
                 }
@@ -490,6 +490,7 @@ public class WorldManager : NetworkBehaviour {
     
     // Use this for initialization
     void Start () {
+        Debug.Log ("World Manager started");
         blockSize = 10;
       
         playerMonitoring = new Dictionary<int, ClientDetails> ();
@@ -499,22 +500,36 @@ public class WorldManager : NetworkBehaviour {
         levelStructure.convertToMesh (regionBlank, transform);        
     }
     
+    // Called when a level containing a world manager is started. Then
+    // get this to connect to the server.
+//     void Awake ()
+//     {
+//         Debug.Log ("World notes level loaded: " + Network.isServer + " - " + Network.isClient);
+//         
+//         if (Network.isServer)
+//         {
+//         OnStartServer ();
+//         Start ();
+//         }
+//     }
+    
     /// When the server starts:
     ///   - Register a handler for any messages that might originate from a client.
     ///   - Create a server dashboard object to visualize the level.
     public override void OnStartServer ()
     {
+        Debug.Log ("World notes server started");
         NetworkServer.RegisterHandler (LevelMsgType.LevelRequest, ClientCommandHandler);
         NetworkServer.RegisterHandler (LevelMsgType.LevelUpdate, ClientCommandHandler);
         
-        Debug.Log ("Spawn local on each client");
-        
-        Vector3 spawnPosition = new Vector3 (10, 0, 0);
-        Quaternion spawnRotation = Quaternion.Euler(0.0f, 0.0f, 0.0f);
-        
-        var localLevel = (GameObject) Instantiate (localLevelPrefab, spawnPosition, spawnRotation);
-        NetworkServer.Spawn(localLevel);
-        Debug.Log ("Spawn local with id " + localLevel.GetComponent<NetworkIdentity>().netId);
+//         Debug.Log ("Spawn local on each client");
+//         
+//         Vector3 spawnPosition = new Vector3 (10, 0, 0);
+//         Quaternion spawnRotation = Quaternion.Euler(0.0f, 0.0f, 0.0f);
+//         
+//         var localLevel = (GameObject) Instantiate (localLevelPrefab, spawnPosition, spawnRotation);
+//         NetworkServer.Spawn(localLevel);
+//         Debug.Log ("Spawn local with id " + localLevel.GetComponent<NetworkIdentity>().netId);
     }
     
     /// Retrieve the record corresponding to the given player's connection.

@@ -67,7 +67,8 @@ public class LocalWorld : NetworkBehaviour {
         foundPlayer = false;
         
         Debug.Log ("Local world level instance started");
-        
+
+//        ClientScene.AddPlayer (0);
     }
     
     /// Identify the level block corresponding to a particular position.
@@ -142,7 +143,7 @@ public class LocalWorld : NetworkBehaviour {
     public override void OnStartClient()
     {
         Debug.Log ("On Client start " + NetworkClient.allClients);
-        
+                
         NetworkClient.allClients[0].RegisterHandler (LevelMsgType.LevelResponse, ServerCommandHandler);
     }
     

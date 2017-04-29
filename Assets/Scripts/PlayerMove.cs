@@ -1,132 +1,96 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.Networking;
+using System.Collections;
+using System.Collections.Generic;
 
-using System;
-
-/// Player object management.
-public class PlayerMove : NetworkBehaviour
-{
-    /// A link to the local level representation,which can be
-    /// queried for any player control operations.
-    protected LocalWorld localWorld;
+public class PlayerState : NetworkBehaviour {
     
-    /// Manage when a block is attached to an edge of the world.
-    protected bool attached;
-    protected Vector3 attachPoint;
+    private const float barSize = 0.2f;
     
-    /// Access method used when the local world registers itself
-    /// with this player object.
-    public void setLocalWorld (LocalWorld lw)
+//     [SyncVar(hook = "OnChangeResourceLevels")]
+    public SyncListFloat resourceLevels = new SyncListFloat ();
+    [SyncVar(hook = "OnChangeResources")]
+    private bool resourceChanged;
+    
+    /// The prefab for components used to display resource levels.
+    public GameObject resourceDisplayElement;
+    
+    /// The actual objects used as part of the bar displaying level of resources.
+    private GameObject [] resourceDisplayObjects = null;
+    
+    // Use this for initialization
+    void Start () {
+        resourceLevels.Add (0.34f);
+        resourceLevels.Add (0.64f);
+        resourceLevels.Add (0.07f);
+        
+        OnChangeResourceLevels (resourceLevels);
+    }
+    
+    public void changeResource (int resourceType, float deltaResource)
     {
-      localWorld = lw;
-//       Debug.Log ("Add block " + localWorld); 
+        if (!isServer)
+        {
+            return;
+        }
+        
+        resourceLevels[resourceType] += deltaResource;
+        
+        if (resourceLevels[resourceType] > 1.0f)
+        {
+            resourceLevels[resourceType] = 1.0f;
+        }
+        
+        resourceChanged = !resourceChanged;
+        Debug.Log ("Changed " + this);
     }
 
-    /// Actions on each update of the player:
-    ///   - handle key presses
-    ///   - check that the player stays in a valid region.
-    void Update()
+    void OnChangeResources (bool changed)
     {
-        Debug.Log ("Player update - " + isLocalPlayer + " - " + localWorld);
-        
+                Debug.Log ("Refreshfix");
+        OnChangeResourceLevels (resourceLevels);
+    }
+
+//       void OnGUI() {
+//           Debug.Log ("Updating resource");
+//           GUI.DrawTexture(new Rect(10, 10, 60, 60), aTexture, ScaleMode.ScaleToFit, true, 10.0F);
+//       }
+    void OnChangeResourceLevels (SyncListFloat resourceLevels )
+    {
+                Debug.Log ("Refresh");
         if (!isLocalPlayer)
         {
             return;
+        }
+                
+        // Initialize objects for the resource bar.
+        if (resourceDisplayObjects == null)
+        {
+            /// The object under which resource display elements are shown.
+            GameObject resourceAreaDisplay = GameObject.Find("ResourceAreaDisplay");
+            GameObject gameGlobals = GameObject.Find("GameGlobals");
 
+            resourceDisplayObjects = new GameObject [GloopResources.NumberOfResources];
+            for (int i = 0; i < GloopResources.NumberOfResources; i++)
+            {
+              GameObject go = UnityEngine.Object.Instantiate (resourceDisplayElement, new Vector3 (0, 0, 0), Quaternion.identity);
+              resourceDisplayObjects[i] = go;
+              resourceDisplayObjects[i].transform.SetParent (resourceAreaDisplay.transform, false);
+              resourceDisplayObjects[i].GetComponent<MeshRenderer>().material = gameGlobals.GetComponent<GloopResources>().resourceMaterials[i];
+            }
         }
         
-        if (localWorld == null)
+        // Translate resource levels into size and position of the resource bar.
+        float position = -0.75f;
+        for (int i = 0; i < GloopResources.NumberOfResources; i++)
         {
-          return;
-        }
-        
-        /// Jump action.
-        var y = 0.0f;
-        if (Input.GetKeyDown(KeyCode.Space) && (isGrounded () || attached))
-        {
-            y = 1.0f;
-            attached = false;
-        }
-        
-        Vector3 playerpos = transform.position;
-        
-        /// Place block action.
-        if (Input.GetKeyDown(KeyCode.LeftControl) && (isGrounded () || attached))
-        {
-            int px = (int) (playerpos.x + 0.5);
-            int py = Math.Max ((int) (playerpos.y), (int) WorldManager.minLevelHeight);
-            int pz = (int) (playerpos.z + 0.5);
+            resourceDisplayObjects[i].transform.localPosition = new Vector3 (position, 0.75f, 0.0f);
+            float amt = barSize * resourceLevels[i];
+            resourceDisplayObjects[i].transform.localScale = new Vector3 (amt, barSize, barSize);
             
-            Debug.Log ("place at " + px + " " + pz + " " + py);
-            localWorld.placeBlock (px, pz, py);
-
-            y = 0.2f;
-            transform.Translate(0, 1, 0);
-
-            attached = false;
-        }
-        
-        /// Turn and move forward.
-        var x = Input.GetAxis("Horizontal") * Time.deltaTime * 150.0f;
-        var z = Input.GetAxis("Vertical") * Time.deltaTime * 3.0f;
-
-        /// Update player state based on actions set.
-        transform.Rotate(0, x, 0);
-        transform.Translate(0, 0, z);
-        
-        Rigidbody rb = GetComponent<Rigidbody> ();
-        rb.AddForce (80.0f * transform.up * y);
-        
-        /// Check that movement is allowed.
-        playerpos = transform.position;
-        if (playerpos.y < WorldManager.minLevelHeight - 0.5f/* && Input.GetKeyDown(KeyCode.RightControl)*/)
-        {
-//           Debug.Log ("Fallen and can't get up: " + playerpos);
-          
-          // Find a block that the player can attach to.
-          Vector3 freepos;
-          bool found = localWorld.findNearestBlock (playerpos, out freepos);
-          if (found)
-          {
-            Debug.Log  ("Finding neighbour for: " + playerpos + " at " + freepos);
-            attachPoint  = freepos;
-            attached = true;
-          }
-          else
-          {
-            // emergency - no blocks available.
-          }
-        }
-        
-        if (attached)
-        {
-            transform.position = attachPoint;
-            rb.velocity = new Vector3 (0.0f, 0.0f, 0.0f);
+            position += barSize;
         }
     }
     
-    /// Some actions are only allowed when the player is on the ground. This method
-    /// checks for that case.
-    bool isGrounded()
-    {
-        var distToGround = 0.4f;
-//         Debug.Log ("distance " + Physics.Raycast(transform.position, -Vector3.up, distToGround + 0.1f) + " " + transform.position + " - " + (-Vector3.up) + " - " + (distToGround + 0.1f));
-        return Physics.Raycast(transform.position, -Vector3.up, distToGround + 0.1f);
-    }
-        
-    /// When a client side instance of the player is started then:
-    ///   - update player view.
-    ///   - attach the main camera to give a external, tracked view of the player.
-    public override void OnStartLocalPlayer()
-    {
-        GameObject playerShape = transform.Find("PlayerShape").gameObject;
-        playerShape.GetComponent<MeshRenderer>().material.color = Color.blue;
-        
-        if(isLocalPlayer)
-        { //if I am the owner of this prefab
-        GameObject camera = GameObject.Find("Main Camera");
-        Debug.Log ("Setup camera" + camera);
-        camera.transform.parent = transform;
-        }
-    }
 }

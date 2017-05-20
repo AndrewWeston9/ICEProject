@@ -155,7 +155,7 @@ public class RegionBlock : MessageBase
             {
                 for (int k = 0; k < zdim; k += 1)
                 {
-                    if (blockStructure[getIndex (i, j, k)] == 1)
+					if (blockStructure[getIndex (i, j, k)] >= 1)
                     {
                         blockSurfaces++;
                     }
@@ -171,7 +171,7 @@ public class RegionBlock : MessageBase
             {
                 for (int k = 0; k < zdim; k += 1)
                 {
-                    if (blockStructure[getIndex (i, j, k)] == 1)
+					if (blockStructure[getIndex (i, j, k)] >= 1)
                     {
                         //  Lower left triangle.
                         tri[tricount++] = ((j + 0) * (ydim + 1) + (i + 0)) * (xdim + 1) + (k + 0);
@@ -191,13 +191,13 @@ public class RegionBlock : MessageBase
     
     /// Modify the level by making a block appear at (x,y). These
     /// coordinates are relative to this RegionBlock.
-    public void setBlock (int x, int y, int z)
+	public void setBlock (int x, int y, int z, int type)
     {
         if ((x >= 0) && (x < blockSize) && 
             (y >= 0) && (y < blockSize) &&
             (z >= 0) && (z < MaxBlockHeight))
         {
-            blockStructure[getIndex (x, y, z)] = 1;
+            blockStructure[getIndex (x, y, z)] = type;
 //              Debug.Log ("Setting " + x + " " + y + " " + z);
             updateTimeStamp ();
         }
@@ -231,7 +231,7 @@ public class RegionBlock : MessageBase
     /// up in a view class, using appropriate methods to query the RegionBlock information.
     
     /// Removes all current views of that block.
-    public void placeBlocks (GameObject block, Transform parentObjectTransform)
+	public void placeBlocks (GameObject block, GameObject block2, GameObject block3, Transform parentObjectTransform)
     {
         for (int i = parentObjectTransform.childCount - 1; i >= 0; i--)
         {
@@ -252,6 +252,18 @@ public class RegionBlock : MessageBase
                         placeSingleBlock (block, pos, parentObjectTransform);
                         //                   Debug.Log ("Block at " + i + " , " + j);
                     }
+					if (blockStructure[getIndex (i, j, k)] == 2)
+					{
+						Vector3 pos = new Vector3 (i, j, k);
+						placeSingleBlock (block2, pos, parentObjectTransform);
+						//                   Debug.Log ("Block at " + i + " , " + j);
+					}
+					if (blockStructure[getIndex (i, j, k)] == 3)
+					{
+						Vector3 pos = new Vector3 (i, j, k);
+						placeSingleBlock (block3, pos, parentObjectTransform);
+						//                   Debug.Log ("Block at " + i + " , " + j);
+					}
                 }
             }
         }
@@ -359,7 +371,7 @@ public class LevelStructure
     }
     
     /// Place a block at the given coordinates, relative to the entire level itself.
-    public void setBlock (float x, float y, float z)
+	public void setBlock (float x, float y, float z, int type)
     {
         int rx = ((int) x) % blockSize;
         int ry = ((int) y) % blockSize;
@@ -369,7 +381,7 @@ public class LevelStructure
         
         if (rb != null)
         {
-            rb.setBlock (rx, ry, rz);
+            rb.setBlock (rx, ry, rz, type);
         }
         
         refreshMesh ();
@@ -654,7 +666,7 @@ public class WorldManager : NetworkBehaviour {
             {
                 Debug.Log ("Changed level");
                 BlockAddMessage m = netMsg.ReadMessage<BlockAddMessage>();
-                levelStructure.setBlock (m.px + 0.5f, m.pz + 0.5f, m.height);
+				levelStructure.setBlock (m.px + 0.5f, m.pz + 0.5f, m.height, m.blocktype);
             }
             break;
             

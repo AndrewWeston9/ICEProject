@@ -22,6 +22,8 @@ class BlockAddMessage : MessageBase
     public float pz;
     
     public float height;
+
+	public int blocktype;
 }
 
 /// A local level block represents a component of the environment
@@ -35,6 +37,7 @@ public class LocalLevelBlock
 {
     public RegionBlock region;
     public GameObject  gobject;
+	public int blocktype;
 }
 
 /// A client equivalent of the Level Structure and World Managers. Cached
@@ -47,7 +50,11 @@ public class LocalWorld : NetworkBehaviour {
     public GameObject localLevelElement;
     
     /// The game object used to represent a brick.
-    public GameObject localBrick;
+	public GameObject localBrick;
+	/// The game object used to represent a wood brick.
+	public GameObject localWoodBrick;
+	/// The game object used to represent a grass brick.
+	public GameObject localGrassBrick;
     
     /// Define the distance about the player that we
     /// are interested in seeing things.
@@ -201,7 +208,7 @@ public class LocalWorld : NetworkBehaviour {
                     llb = addLevelBlock (rb, llbpos);
                     
                     // llb should now be valid.
-                    llb.region.placeBlocks (localBrick, llb.gobject.transform);
+					llb.region.placeBlocks (localBrick, localGrassBrick, localWoodBrick, llb.gobject.transform);
                 }
                 else
                 {
@@ -210,7 +217,7 @@ public class LocalWorld : NetworkBehaviour {
                     {
                         llb.region = rb;
 //                         Debug.Log ("Got update ..................................>");
-                        llb.region.placeBlocks (localBrick, llb.gobject.transform);
+						llb.region.placeBlocks (localBrick, localGrassBrick, localWoodBrick, llb.gobject.transform);
                     }
                 }
                 
@@ -229,7 +236,7 @@ public class LocalWorld : NetworkBehaviour {
     // Add a new block at the given position. The intent is to allow players to immediately
     // reflect actions in the local game, which may eventually be replaced when the update
     // is returned from the server.
-    public void placeBlock (float x, float z, float height)
+	public void placeBlock (float x, float z, float height, int type)
     {
         // Coordinates for the region block - only horizontal elements.
         Vector3 llbpos = new Vector3 (x, 0.0f, z);
@@ -241,7 +248,7 @@ public class LocalWorld : NetworkBehaviour {
             Vector3 regionpos = new Vector3 (x - llb.region.blockCoordX, z - llb.region.blockCoordY, blockHeight);
             // llb should now be valid.
             // Make a local copy before signalling the change to the world.
-//            llb.region.placeSingleBlock (localBrick, regionpos, llb.gobject.transform);
+            //llb.region.placeSingleBlock (localBrick, regionpos, llb.gobject.transform);
         }
         else
             // else no region - potential problem.
@@ -255,6 +262,7 @@ public class LocalWorld : NetworkBehaviour {
         m.px = x;
         m.pz = z;
         m.height = blockHeight;
+		m.blocktype = type;
         NetworkManager.singleton.client.Send (LevelMsgType.LevelUpdate, m);        
     }
     
@@ -278,7 +286,7 @@ public class LocalWorld : NetworkBehaviour {
         {
           int value;
           bool hasValue = findBlock (new Vector3 (x + offx[i], height, z + offz[i]), out value);
-          if (hasValue && (value == 1))
+			if (hasValue && (value == 1 || value == 2 || value == 3))
           {
 //              y = (int) WorldManager.minLevelHeight;
               y = height;

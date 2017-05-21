@@ -5,6 +5,14 @@ using UnityEngine.Networking;
 
 using System;
 
+public struct brickClass
+{
+	/// stores the type of brick.
+	public int brickType;
+	/// Stores the current health of the brick. 0 would mean it is destroyed.
+	public int brickHealth;
+}
+
 /// Represents a square block of the level, intended for
 /// sharing over the network. 
 /// Update: region blocks now contain voxel desriptions. 
@@ -22,7 +30,7 @@ public class RegionBlock : MessageBase
     public int blockCoordX;
     public int blockCoordY;
     public int blockSize;
-    public int [] blockStructure;
+	public brickClass [] blockStructure;
     
     /// A timestamp indicating the time at which this object was
     /// last written.
@@ -86,7 +94,7 @@ public class RegionBlock : MessageBase
         blockCoordY = y;
         
         blockSize = mblockSize;
-        blockStructure = new int [blockSize * blockSize * MaxBlockHeight];
+		blockStructure = new brickClass[blockSize * blockSize * MaxBlockHeight];
         for (int i = 0; i < blockSize; i += 1)
         {
             for (int j = 0; j < blockSize; j += 1)
@@ -102,11 +110,11 @@ public class RegionBlock : MessageBase
                 {
                     if (k < zc)
                     {
-                        blockStructure[getIndex (i, j, k)] = 1;
+						blockStructure[getIndex (i, j, k)].brickType = 1;
                     }
                     else
                     {
-                        blockStructure[getIndex (i, j, k)] = 0;
+						blockStructure[getIndex (i, j, k)].brickType = 0;
                     }
                 }
             }
@@ -155,7 +163,7 @@ public class RegionBlock : MessageBase
             {
                 for (int k = 0; k < zdim; k += 1)
                 {
-					if (blockStructure[getIndex (i, j, k)] >= 1)
+					if (blockStructure[getIndex (i, j, k)].brickType >= 1)
                     {
                         blockSurfaces++;
                     }
@@ -171,7 +179,7 @@ public class RegionBlock : MessageBase
             {
                 for (int k = 0; k < zdim; k += 1)
                 {
-					if (blockStructure[getIndex (i, j, k)] >= 1)
+					if (blockStructure[getIndex (i, j, k)].brickType >= 1)
                     {
                         //  Lower left triangle.
                         tri[tricount++] = ((j + 0) * (ydim + 1) + (i + 0)) * (xdim + 1) + (k + 0);
@@ -197,7 +205,8 @@ public class RegionBlock : MessageBase
             (y >= 0) && (y < blockSize) &&
             (z >= 0) && (z < MaxBlockHeight))
         {
-            blockStructure[getIndex (x, y, z)] = type;
+			blockStructure[getIndex (x, y, z)].brickType = type;
+			blockStructure[getIndex (x, y, z)].brickHealth = 5;
 //              Debug.Log ("Setting " + x + " " + y + " " + z);
             updateTimeStamp ();
         }
@@ -211,7 +220,7 @@ public class RegionBlock : MessageBase
             (y >= 0) && (y < blockSize) &&
             (z >= 0) && (z < MaxBlockHeight))
         {
-            return blockStructure[getIndex (x, y, z)];
+			return blockStructure[getIndex (x, y, z)].brickType;
         }
         return 0;
     }
@@ -246,19 +255,19 @@ public class RegionBlock : MessageBase
                 //                   Debug.Log ("Block at " + i + " , " + j + " ==" + blockStructure[getIndex (i, j)] + " - " + timeLastChanged);
                 for (int k = 0; k < MaxBlockHeight; k += 1)
                 {
-                    if (blockStructure[getIndex (i, j, k)] == 1)
+					if (blockStructure[getIndex (i, j, k)].brickType == 1)
                     {
                         Vector3 pos = new Vector3 (i, j, k);
                         placeSingleBlock (block, pos, parentObjectTransform);
                         //                   Debug.Log ("Block at " + i + " , " + j);
                     }
-					if (blockStructure[getIndex (i, j, k)] == 2)
+					if (blockStructure[getIndex (i, j, k)].brickType == 2)
 					{
 						Vector3 pos = new Vector3 (i, j, k);
 						placeSingleBlock (block2, pos, parentObjectTransform);
 						//                   Debug.Log ("Block at " + i + " , " + j);
 					}
-					if (blockStructure[getIndex (i, j, k)] == 3)
+					if (blockStructure[getIndex (i, j, k)].brickType == 3)
 					{
 						Vector3 pos = new Vector3 (i, j, k);
 						placeSingleBlock (block3, pos, parentObjectTransform);
@@ -401,6 +410,9 @@ public class LevelMsgType {
     /// Player indicates some action resulting in a modification to the
     /// master copy of the level.
     public const short LevelUpdate = MsgType.Highest + 3;
+
+	/// Send a current list of players actively on the server.
+	public const short PlayerList = MsgType.Highest + 4;
 };
 
 /// For each client, keep track of which regions are within a zone of interest.
@@ -468,6 +480,15 @@ public class ClientDetails
     }
 }
 
+// sctruct for a single Resource pillar.
+public struct ResourcePillar
+{
+
+	public int resourceType;
+
+	public Vector3 resourcePosition;
+}
+
 /// State management for the world as represented on the server.
 public class WorldManager : NetworkBehaviour {
     
@@ -499,6 +520,9 @@ public class WorldManager : NetworkBehaviour {
     private int blockSize;
     
     public const float minLevelHeight = 2.0f;
+
+	/// List of Resources in the world.
+	public Dictionary<int, ResourcePillar> ResourceList;
     
     // Use this for initialization
     void Start () {
@@ -573,6 +597,12 @@ public class WorldManager : NetworkBehaviour {
         ClientDetails thiscd = getPlayerDetails (connId);
         thiscd.representation.transform.localPosition = new Vector3 (thiscd.position.x / blockSize, thiscd.position.z / blockSize, 0.0f);
     }
+
+	//Send clients updated lists of all players
+	void sendPlayerList (int connectionId)
+	{
+		
+	}
     
     /// Send an update to the player identified by the given connection ID. Work out
     /// which regions have changed, and communicate those details.

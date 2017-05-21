@@ -26,6 +26,15 @@ class BlockAddMessage : MessageBase
 	public int blocktype;
 }
 
+/// The message sent to clients containing a list of all active players.
+class PlayerListMessage : MessageBase
+{
+	public Vector3 playerPosition;
+
+
+}
+
+
 /// A local level block represents a component of the environment
 /// in which the player exists. The complete environment will consist
 /// of several of these blocks, and any other environmentally global
@@ -224,6 +233,13 @@ public class LocalWorld : NetworkBehaviour {
                 flushRegions ();
             }
             break;
+
+			case LevelMsgType.PlayerList:
+			/// Message containing list of active players.
+			{
+				
+			}
+			break;
             
             default:
             {

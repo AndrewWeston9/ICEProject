@@ -11,7 +11,7 @@ public class GloopResources : MonoBehaviour {
         public const int NumberOfResources = 3;
 
         public Material [] resourceMaterials = new Material [NumberOfResources];
-        
+
 	// Use this for initialization
 	void Start () {
 		

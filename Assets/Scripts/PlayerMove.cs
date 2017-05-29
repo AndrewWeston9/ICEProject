@@ -34,6 +34,7 @@ public class PlayerMove : NetworkBehaviour
 	///   - check that the player stays in a valid region.
 	void Update()
 	{
+		DontDestroyOnLoad (this.gameObject);
 		;
 
 		Ray ray = Camera.main.ScreenPointToRay(new Vector3((Screen.width/2),(Screen.height/2),0));
@@ -232,8 +233,8 @@ public class PlayerMove : NetworkBehaviour
 	public override void OnStartLocalPlayer()
 	{
 		GameObject playerShape = transform.Find("PlayerShape").gameObject;
-		playerShape.GetComponent<MeshRenderer>().material.color = Color.blue;
-
+		playerShape.GetComponent<MeshRenderer>().material.color = Color.blue; 
+		
 		if(isLocalPlayer)
 		{ //if I am the owner of this prefab
 			GameObject camera = GameObject.Find("Main Camera");

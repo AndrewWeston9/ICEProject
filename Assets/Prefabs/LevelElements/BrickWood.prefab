@@ -9,33 +9,33 @@ Prefab:
     m_Modifications: []
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 0}
-  m_RootGameObject: {fileID: 1593302540197858}
+  m_RootGameObject: {fileID: 1527562966145640}
   m_IsPrefabParent: 1
---- !u!1 &1593302540197858
+--- !u!1 &1527562966145640
 GameObject:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   serializedVersion: 5
   m_Component:
-  - component: {fileID: 4675314065473286}
-  - component: {fileID: 114602280424817206}
-  - component: {fileID: 114964277902816232}
-  - component: {fileID: 33315626159464712}
-  - component: {fileID: 23874862355508310}
+  - component: {fileID: 4765993413042932}
+  - component: {fileID: 33751220010660276}
+  - component: {fileID: 65072738033956926}
+  - component: {fileID: 23744796034251820}
+  - component: {fileID: 95704321135152188}
   m_Layer: 0
-  m_Name: LocalWorldLevel
+  m_Name: BrickWood
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &4675314065473286
+--- !u!4 &4765993413042932
 Transform:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1593302540197858}
+  m_GameObject: {fileID: 1527562966145640}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
@@ -43,12 +43,12 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!23 &23874862355508310
+--- !u!23 &23744796034251820
 MeshRenderer:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1593302540197858}
+  m_GameObject: {fileID: 1527562966145640}
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
@@ -56,7 +56,7 @@ MeshRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_Materials:
-  - {fileID: 0}
+  - {fileID: 2100000, guid: 223265af693bf524b853bc74899b5dc1, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -64,7 +64,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
-  m_PreserveUVs: 0
+  m_PreserveUVs: 1
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
   m_SelectedEditorRenderState: 3
@@ -75,61 +75,39 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
---- !u!33 &33315626159464712
+--- !u!33 &33751220010660276
 MeshFilter:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1593302540197858}
-  m_Mesh: {fileID: 0}
---- !u!114 &114602280424817206
-MonoBehaviour:
+  m_GameObject: {fileID: 1527562966145640}
+  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!65 &65072738033956926
+BoxCollider:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1593302540197858}
+  m_GameObject: {fileID: 1527562966145640}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
   m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 372142912, guid: 870353891bb340e2b2a9c8707e7419ba, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_SceneId:
-    m_Value: 0
-  m_AssetId:
-    i0: 154
-    i1: 15
-    i2: 196
-    i3: 152
-    i4: 19
-    i5: 129
-    i6: 164
-    i7: 140
-    i8: 106
-    i9: 200
-    i10: 158
-    i11: 213
-    i12: 69
-    i13: 113
-    i14: 97
-    i15: 45
-  m_ServerOnly: 0
-  m_LocalPlayerAuthority: 0
---- !u!114 &114964277902816232
-MonoBehaviour:
+  serializedVersion: 2
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!95 &95704321135152188
+Animator:
+  serializedVersion: 3
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1593302540197858}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b4cd29a431665437d8122f07c09069b6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  localLevelElement: {fileID: 1312767603035820, guid: d1e01dd97a80b4bd5b240e4e1b20a7a6,
-    type: 2}
-  localBrick: {fileID: 1527562966145640, guid: 8f1e79908533c4ae38e214b8633feef9, type: 2}
-  localWoodBrick: {fileID: 1527562966145640, guid: 915faa33cecd6bd41a3057c2a5ff5409,
-    type: 2}
-  localGrassBrick: {fileID: 1527562966145640, guid: 16f6f01b28dd54049821b839334b36ce,
-    type: 2}
-  viewRadius: 15
+  m_GameObject: {fileID: 1527562966145640}
+  m_Enabled: 0
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 7f0c36da97030492890cc69ddeb5420b, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1

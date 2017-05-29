@@ -44,7 +44,13 @@ public class ResourceProducer : MonoBehaviour {
         if (gameGlobals == null)
         {
             gameGlobals = GameObject.Find("GameGlobals");
-            gameObject.GetComponent<MeshRenderer>().material = gameGlobals.GetComponent<GloopResources>().resourceMaterials[resourceType];
+
+			//THIS LINE THROWS ERRORS. FIX THIS.
+			if (this.resourceType == 0 || this.resourceType == 1 || this.resourceType == 2 || this.resourceType == 3)
+			{
+            	gameObject.GetComponent<MeshRenderer>().material = gameGlobals.GetComponent<GloopResources>().resourceMaterials[resourceType]; //THIS LINE THROWS ERRORS. FIX THIS.
+			}
+			//THIS LINE THROWS ERRORS. FIX THIS.
         }
         if (gameGlobals != null)
         {

@@ -180,15 +180,23 @@ public class PlayerMove : NetworkBehaviour
 
 
 		/// Turn and move forward.
-		var x = Input.GetAxis("Horizontal") * Time.deltaTime * 150.0f;
+		//var x = Input.GetAxis("Horizontal") * Time.deltaTime * 150.0f;
+		//var z = Input.GetAxis("Vertical") * Time.deltaTime * 3.0f;
+
+		var x = (Input.GetAxis("Mouse X") * 5.0f);
+		/// Update player state based on actions set.
+		/// 
+
 		var z = Input.GetAxis("Vertical") * Time.deltaTime * 3.0f;
+		var strafe = Input.GetAxis("Horizontal") * Time.deltaTime * 3.0f;
+		var testY = Input.GetAxis("Mouse Y") * Time.deltaTime * 100.0f;
 
 		/// Update player state based on actions set.
-		transform.Rotate(0, x, 0);
-		transform.Translate(0, 0, z);
+	transform.Rotate(0, x, 0);
+	transform.Translate(strafe, 0, z);
 
-		Rigidbody rb = GetComponent<Rigidbody> ();
-		rb.AddForce (80.0f * transform.up * y);
+	Rigidbody rb = GetComponent<Rigidbody> ();
+	rb.AddForce (80.0f * transform.up * y);
 
 		/// Check that movement is allowed.
 		playerpos = transform.position;
@@ -213,7 +221,8 @@ public class PlayerMove : NetworkBehaviour
 
 		if (attached)
 		{
-			transform.position = attachPoint;
+			//transform.position = attachPoint;
+			transform.position = Vector3.MoveTowards(transform.position, attachPoint, 1.0f); //attachPoint;
 			rb.velocity = new Vector3 (0.0f, 0.0f, 0.0f);
 		}
 	}

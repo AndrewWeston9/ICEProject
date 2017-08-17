@@ -1,10 +1,10 @@
 ﻿
 
-  using UnityEngine; 
-  using System.Collections; 
-  using System.Collections.Generic; 
-  using UnityEngine.UI;
-
+using UnityEngine; 
+using System.Collections; 
+using System.Collections.Generic; 
+using UnityEngine.UI;
+using UnityEngine.Networking;
 
 
 
@@ -105,6 +105,12 @@ public class EmoteWheel : MonoBehaviour
             SpriteRenderer renderer = emoteobject.AddComponent<SpriteRenderer>();
             IconObject qwe = emoteobject.AddComponent<IconObject>();
             renderer.sprite = sprite1;
+
+			/// send emote to server
+			SendEmoteMessage m = new SendEmoteMessage();
+			m.emoteType = 1;
+			NetworkManager.singleton.client.Send (LevelMsgType.EmoteSingleReceiver, m);
+
             Destroy(emoteobject, EmoteLifetime);
 
             /*

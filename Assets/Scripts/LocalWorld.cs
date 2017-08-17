@@ -26,6 +26,25 @@ class BlockAddMessage : MessageBase
 	public int blocktype;
 }
 
+/// Message for a player sending a single emote to the server.
+class SendEmoteMessage : MessageBase
+{
+	public byte emoteType;
+}
+
+class SendEmoteMessageAndClientID : MessageBase
+{
+	public byte emoteType;
+	public int connId;
+}
+
+/// Struct for storing active emotes
+public struct ActiveEmotesStruct
+{
+	public byte emoteType;
+	public int connId;
+}
+
 
 /// A local level block represents a component of the environment
 /// in which the player exists. The complete environment will consist
@@ -153,6 +172,7 @@ public class LocalWorld : NetworkBehaviour {
         Debug.Log ("On Client start " + NetworkClient.allClients);
                 
         NetworkClient.allClients[0].RegisterHandler (LevelMsgType.LevelResponse, ServerCommandHandler);
+		NetworkClient.allClients[0].RegisterHandler (LevelMsgType.EmoteSingleSender, ServerCommandHandler); // Handle incoming emotes from server
     }
     
     // Update is called once per frame
@@ -230,6 +250,15 @@ public class LocalWorld : NetworkBehaviour {
 			/// Message containing list of active players.
 			{
 				
+			}
+			break;
+
+			case LevelMsgType.EmoteSingleSender:
+				/// Handle incoming emotes from server
+			{
+				SendEmoteMessageAndClientID m = netMsg.ReadMessage<SendEmoteMessageAndClientID> ();
+				//Insert code here to handle incoming message from server!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+				Debug.Log ("Incoming emote to client from server from connection id: " + m.connId);
 			}
 			break;
             
@@ -346,4 +375,12 @@ public class LocalWorld : NetworkBehaviour {
         availablePosition = new Vector3 (0.0f, 0.0f, 0.0f);
         return false;
     }
+
+	/// Method for use by EmoteWheel.cs to send an emote to the server.
+	/*public void sendEmote(byte emote)
+	{
+		SendEmoteMessage m = new SendEmoteMessage();
+		m.emoteType = emote;
+		NetworkManager.singleton.client.Send (LevelMsgType.EmoteSingleReceiver, m);
+	}*/
 }

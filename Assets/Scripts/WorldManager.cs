@@ -413,6 +413,12 @@ public class LevelMsgType {
 
 	/// Send a current list of players actively on the server.
 	public const short PlayerList = MsgType.Highest + 4;
+
+	/// Receiving a single emote from a player.
+	public const short EmoteSingleReceiver = MsgType.Highest + 5;
+
+	/// Send emote and playerID of emote sender to each client.
+	public const short EmoteSingleSender = MsgType.Highest + 6;
 };
 
 /// For each client, keep track of which regions are within a zone of interest.
@@ -557,6 +563,7 @@ public class WorldManager : NetworkBehaviour {
         Debug.Log ("World notes server started");
         NetworkServer.RegisterHandler (LevelMsgType.LevelRequest, ClientCommandHandler);
         NetworkServer.RegisterHandler (LevelMsgType.LevelUpdate, ClientCommandHandler);
+		NetworkServer.RegisterHandler (LevelMsgType.EmoteSingleReceiver, ClientCommandHandler); //Client handler for incoming Emotes from clients
         
 //         Debug.Log ("Spawn local on each client");
 //         
@@ -602,6 +609,21 @@ public class WorldManager : NetworkBehaviour {
 	void sendPlayerList (int connectionId)
 	{
 		
+	}
+
+	//Send all clients an emote
+	void sendAllClientEmote(int connId, byte emote)
+	{
+		foreach(KeyValuePair<int, ClientDetails> entry in playerMonitoring)
+		{
+			if (entry.Key != connId)
+			{
+				SendEmoteMessageAndClientID m = new SendEmoteMessageAndClientID ();
+				m.emoteType = emote;
+				m.connId = connId;
+				NetworkServer.SendToClient (entry.Key, LevelMsgType.EmoteSingleSender, m);
+			}
+		}
 	}
     
     /// Send an update to the player identified by the given connection ID. Work out
@@ -699,7 +721,17 @@ public class WorldManager : NetworkBehaviour {
 				levelStructure.setBlock (m.px + 0.5f, m.pz + 0.5f, m.height, m.blocktype);
             }
             break;
-            
+
+			case LevelMsgType.EmoteSingleReceiver:
+				/// Receiving a single emote from a player.
+			{
+				Debug.Log ("Server has received emote");
+				SendEmoteMessage m = netMsg.ReadMessage<SendEmoteMessage> ();
+				//Do something with emote received here.!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+				sendAllClientEmote(netMsg.conn.connectionId, m.emoteType);
+			}
+			break;
+
             default:
             {
                 Debug.Log ("Unexpected message type");

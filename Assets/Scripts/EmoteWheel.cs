@@ -7,7 +7,6 @@ using UnityEngine.UI;
 using UnityEngine.Networking;
 
 
-
 public class EmoteWheel : MonoBehaviour
 {
     public List<EmoteButton> buttons = new List<EmoteButton>();
@@ -107,8 +106,9 @@ public class EmoteWheel : MonoBehaviour
             renderer.sprite = sprite1;
 
 			/// send emote to server
+			//LocalWorld.sendEmote(0);
 			SendEmoteMessage m = new SendEmoteMessage();
-			m.emoteType = 1;
+			m.emoteType = 0;
 			NetworkManager.singleton.client.Send (LevelMsgType.EmoteSingleReceiver, m);
 
             Destroy(emoteobject, EmoteLifetime);
@@ -131,6 +131,12 @@ public class EmoteWheel : MonoBehaviour
             SpriteRenderer renderer = emoteobject.AddComponent<SpriteRenderer>();
             IconObject qwe = emoteobject.AddComponent<IconObject>();
             renderer.sprite = sprite2;
+
+			/// send emote to server
+			SendEmoteMessage m = new SendEmoteMessage();
+			m.emoteType = 1;
+			NetworkManager.singleton.client.Send (LevelMsgType.EmoteSingleReceiver, m);
+
             Destroy(emoteobject, EmoteLifetime);
 
 
@@ -144,6 +150,12 @@ public class EmoteWheel : MonoBehaviour
             SpriteRenderer renderer = emoteobject.AddComponent<SpriteRenderer>();
             IconObject qwe = emoteobject.AddComponent<IconObject>();
             renderer.sprite = sprite3;
+
+			/// send emote to server
+			SendEmoteMessage m = new SendEmoteMessage();
+			m.emoteType = 2;
+			NetworkManager.singleton.client.Send (LevelMsgType.EmoteSingleReceiver, m);
+
             Destroy(emoteobject, EmoteLifetime);
 
 
@@ -160,6 +172,12 @@ public class EmoteWheel : MonoBehaviour
             SpriteRenderer renderer = emoteobject.AddComponent<SpriteRenderer>();
             IconObject qwe = emoteobject.AddComponent<IconObject>();
             renderer.sprite = sprite4;
+
+			/// send emote to server
+			SendEmoteMessage m = new SendEmoteMessage();
+			m.emoteType = 3;
+			NetworkManager.singleton.client.Send (LevelMsgType.EmoteSingleReceiver, m);
+
             Destroy(emoteobject, EmoteLifetime);
 
             //SpriteRenderer renderer =NewEmote.AddComponent<SpriteRenderer>();
@@ -182,10 +200,48 @@ public class EmoteWheel : MonoBehaviour
 
         menuon = false;
     }
+
+	public void displayEmote(int emoteType, int connId)
+	{
+		GameObject Player = GameObject.Find("Player(Clone)");
+		Vector3 offset = new Vector3(0.0f, 2.0f, 0.0f);
+		if (emoteType == 0)
+		{
+			GameObject emoteobject = new GameObject("Emote");
+			SpriteRenderer renderer = emoteobject.AddComponent<SpriteRenderer>();
+			IconObject qwe = emoteobject.AddComponent<IconObject>();
+			renderer.sprite = sprite1;
+			Destroy(emoteobject, EmoteLifetime);
+		}
+		else if (emoteType == 1)
+		{
+			GameObject emoteobject = new GameObject("Emote");
+			SpriteRenderer renderer = emoteobject.AddComponent<SpriteRenderer>();
+			IconObject qwe = emoteobject.AddComponent<IconObject>();
+			renderer.sprite = sprite2;
+			Destroy(emoteobject, EmoteLifetime);
+		}
+		else if (emoteType == 2)
+		{
+			GameObject emoteobject = new GameObject("Emote");
+			SpriteRenderer renderer = emoteobject.AddComponent<SpriteRenderer>();
+			IconObject qwe = emoteobject.AddComponent<IconObject>();
+			renderer.sprite = sprite3;
+			Destroy(emoteobject, EmoteLifetime);
+		}
+		else if (emoteType == 3)
+		{
+			GameObject emoteobject = new GameObject("Emote");
+			SpriteRenderer renderer = emoteobject.AddComponent<SpriteRenderer>();
+			IconObject qwe = emoteobject.AddComponent<IconObject>();
+			renderer.sprite = sprite4;
+			Destroy(emoteobject, EmoteLifetime);
+		}
+	}
 }
 
 
- public class IconObject : MonoBehaviour
+public class IconObject : MonoBehaviour
 {
 
     public void GetSprite(Sprite z)

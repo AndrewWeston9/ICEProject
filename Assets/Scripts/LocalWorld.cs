@@ -29,16 +29,17 @@ class BlockAddMessage : MessageBase
 /// Message for a player sending a single emote to the server.
 class SendEmoteMessage : MessageBase
 {
-	public byte emoteType;
+	public int emoteType;
 }
 
 class SendEmoteMessageAndClientID : MessageBase
 {
-	public byte emoteType;
+	public int emoteType;
 	public int connId;
 }
 
 /// Struct for storing active emotes
+/// Delete this in future. No longer needed.
 public struct ActiveEmotesStruct
 {
 	public byte emoteType;
@@ -79,6 +80,9 @@ public class LocalWorld : NetworkBehaviour {
     /// Define the distance about the player that we
     /// are interested in seeing things.
     public float viewRadius;
+
+	//declare new emotedisplayclass for displaying incoming emotes.
+	private EmoteDisplayClass emoteDisplayer = new EmoteDisplayClass();
     
     /// Local level cache.
     private List<LocalLevelBlock> levelStructure; 
@@ -257,7 +261,7 @@ public class LocalWorld : NetworkBehaviour {
 				/// Handle incoming emotes from server
 			{
 				SendEmoteMessageAndClientID m = netMsg.ReadMessage<SendEmoteMessageAndClientID> ();
-				//Insert code here to handle incoming message from server!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+				displayEmote(m.emoteType, m.connId);
 				Debug.Log ("Incoming emote to client from server from connection id: " + m.connId);
 			}
 			break;
@@ -270,7 +274,12 @@ public class LocalWorld : NetworkBehaviour {
         }
     }
     
-    // Add a new block at the given position. The intent is to allow players to immediately
+	public void displayEmote(int emoteType, int connId)
+	{
+		emoteDisplayer.displayEmote (emoteType, connId);
+	}
+
+	// Add a new block at the given position. The intent is to allow players to immediately
     // reflect actions in the local game, which may eventually be replaced when the update
     // is returned from the server.
 	public void placeBlock (float x, float z, float height, int type)
@@ -377,10 +386,99 @@ public class LocalWorld : NetworkBehaviour {
     }
 
 	/// Method for use by EmoteWheel.cs to send an emote to the server.
-	/*public void sendEmote(byte emote)
+	/*public static void sendEmote(int emote)
 	{
-		SendEmoteMessage m = new SendEmoteMessage();
+		SendEmoteMessage m = new SendEmoteMessage ();
 		m.emoteType = emote;
 		NetworkManager.singleton.client.Send (LevelMsgType.EmoteSingleReceiver, m);
 	}*/
 }
+
+public class EmoteDisplayClass : MonoBehaviour
+{
+	public List<EmoteButton> buttons = new List<EmoteButton>();
+	private Vector2 Mouseposition;
+	private Vector2 fromVector2M = new Vector2(0.5f, 1.0f);
+	private Vector2 centercirlce = new Vector2(0.5f, 0.5f);
+	private Vector2 toVector2M;
+	public Sprite sprite1;
+	public Sprite sprite2;
+	public Sprite sprite3;
+	public Sprite sprite4;
+	public float EmoteLifetime = 2;
+	private bool menuon;
+	public int menuItems;
+
+	public void displayEmote(int emoteType, int connId)
+	{
+		GameObject Player = GameObject.Find("Player(Clone)");
+		Vector3 offset = new Vector3(0.0f, 2.0f, 0.0f);
+		if (emoteType == 0)
+		{
+			GameObject emoteobject = new GameObject("Emote");
+			SpriteRenderer renderer = emoteobject.AddComponent<SpriteRenderer>();
+			IconObject qwe = emoteobject.AddComponent<IconObject>();
+			renderer.sprite = sprite1;
+			Destroy(emoteobject, EmoteLifetime);
+		}
+		else if (emoteType == 1)
+		{
+			GameObject emoteobject = new GameObject("Emote");
+			SpriteRenderer renderer = emoteobject.AddComponent<SpriteRenderer>();
+			IconObject qwe = emoteobject.AddComponent<IconObject>();
+			renderer.sprite = sprite2;
+			Destroy(emoteobject, EmoteLifetime);
+		}
+		else if (emoteType == 2)
+		{
+			GameObject emoteobject = new GameObject("Emote");
+			SpriteRenderer renderer = emoteobject.AddComponent<SpriteRenderer>();
+			IconObject qwe = emoteobject.AddComponent<IconObject>();
+			renderer.sprite = sprite3;
+			Destroy(emoteobject, EmoteLifetime);
+		}
+		else if (emoteType == 3)
+		{
+			GameObject emoteobject = new GameObject("Emote");
+			SpriteRenderer renderer = emoteobject.AddComponent<SpriteRenderer>();
+			IconObject qwe = emoteobject.AddComponent<IconObject>();
+			renderer.sprite = sprite4;
+			Destroy(emoteobject, EmoteLifetime);
+		}
+	}
+}
+
+/*public class IconObject : MonoBehaviour
+{
+
+	public void GetSprite(Sprite z)
+	{
+		//Emotetype = z;
+	}
+	public GameObject EmotePicture;
+	GameObject Player;
+	Vector3 offset = new Vector3(0.0f, 2.0f, 0.0f);
+	// public Sprite Emotetype;
+	// SpriteRenderer SR;
+
+
+	public float lifetime = 2.0f;
+
+	void Start()
+	{
+		Player = GameObject.Find("Player(Clone)");
+		Destroy(this, 2);
+		print("New object created");
+		// GameObject go = new GameObject("Test");
+		//SpriteRenderer renderer = EmotePicture.AddComponent<SpriteRenderer>();
+
+	}
+
+	void Update()
+	{
+		//SR.sprite = Emotetype;
+		transform.position = (Player.transform.position) + offset;
+		transform.rotation = Quaternion.LookRotation(-Camera.main.transform.forward);
+		print("Object updating");
+	}
+}*/

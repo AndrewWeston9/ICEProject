@@ -564,6 +564,7 @@ public class WorldManager : NetworkBehaviour {
         NetworkServer.RegisterHandler (LevelMsgType.LevelRequest, ClientCommandHandler);
         NetworkServer.RegisterHandler (LevelMsgType.LevelUpdate, ClientCommandHandler);
 		NetworkServer.RegisterHandler (LevelMsgType.EmoteSingleReceiver, ClientCommandHandler); //Client handler for incoming Emotes from clients
+		NetworkServer.RegisterHandler (LevelMsgType.EmoteSingleSender, ClientCommandHandler); // Handler for sending each client a copy of an emote with sender id attached.
         
 //         Debug.Log ("Spawn local on each client");
 //         
@@ -612,17 +613,18 @@ public class WorldManager : NetworkBehaviour {
 	}
 
 	//Send all clients an emote
-	void sendAllClientEmote(int connId, byte emote)
+	void sendAllClientEmote(int connId, int emote)
 	{
 		foreach(KeyValuePair<int, ClientDetails> entry in playerMonitoring)
 		{
-			if (entry.Key != connId)
-			{
+			//Temporarily commented out pending tests for connection id.
+			//if (entry.Key != connId)
+			//{
 				SendEmoteMessageAndClientID m = new SendEmoteMessageAndClientID ();
 				m.emoteType = emote;
 				m.connId = connId;
 				NetworkServer.SendToClient (entry.Key, LevelMsgType.EmoteSingleSender, m);
-			}
+			//}
 		}
 	}
     
@@ -725,10 +727,9 @@ public class WorldManager : NetworkBehaviour {
 			case LevelMsgType.EmoteSingleReceiver:
 				/// Receiving a single emote from a player.
 			{
-				Debug.Log ("Server has received emote");
 				SendEmoteMessage m = netMsg.ReadMessage<SendEmoteMessage> ();
-				//Do something with emote received here.!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 				sendAllClientEmote(netMsg.conn.connectionId, m.emoteType);
+				Debug.Log ("Emote Received from Client.");
 			}
 			break;
 

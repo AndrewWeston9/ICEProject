@@ -17,7 +17,6 @@ public class ResourceProducerScatterer : NetworkBehaviour {
             Vector3 pos = new Vector3 ((int) Random.Range (0f, 100.0f), WorldManager.minLevelHeight + 2.0f, (int) Random.Range (0f, 100.0f));
             GameObject rpInstance = UnityEngine.Object.Instantiate (resourceProducer, pos, Quaternion.identity);
             rpInstance.GetComponent<ResourceProducer>().resourceType = (int) Random.Range (0f, 4f);
-            
             NetworkServer.Spawn (rpInstance);
         }
     }

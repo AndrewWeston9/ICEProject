@@ -10,6 +10,7 @@ public class PlayerMove : NetworkBehaviour
 	/// queried for any player control operations.
 	protected LocalWorld localWorld;
 
+
 	/// Manage when a block is attached to an edge of the world.
 	protected bool attached;
 	protected Vector3 attachPoint;

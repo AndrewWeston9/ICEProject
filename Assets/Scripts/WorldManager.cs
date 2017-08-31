@@ -607,24 +607,26 @@ public class WorldManager : NetworkBehaviour {
     }
 
 	//Send clients updated lists of all players
-	void sendPlayerList (int connectionId)
-	{
-		
-	}
-
-	//Send all clients an emote
-	void sendAllClientEmote(int connId, int emote)
+	/*void sendPlayerList (int connectionId)
 	{
 		foreach(KeyValuePair<int, ClientDetails> entry in playerMonitoring)
 		{
-			//Temporarily commented out pending tests for connection id.
-			//if (entry.Key != connId)
-			//{
+			PlayerListMessage m = new PlayerListMessage ();
+			m.emoteType = emote;
+			m.connId = connId;
+			NetworkServer.SendToClient (entry.Key, LevelMsgType.EmoteSingleSender, m);
+		}
+	}*/
+
+	//Send all clients an emote
+	void sendAllClientEmote(NetworkInstanceId netId, int emote)
+	{
+		foreach(KeyValuePair<int, ClientDetails> entry in playerMonitoring)
+		{
 				SendEmoteMessageAndClientID m = new SendEmoteMessageAndClientID ();
 				m.emoteType = emote;
-				m.connId = connId;
+				m.netId = netId;
 				NetworkServer.SendToClient (entry.Key, LevelMsgType.EmoteSingleSender, m);
-			//}
 		}
 	}
     
@@ -724,11 +726,11 @@ public class WorldManager : NetworkBehaviour {
             }
             break;
 
-			case LevelMsgType.EmoteSingleReceiver:
+			case LevelMsgType.EmoteSingleSender:
 				/// Receiving a single emote from a player.
 			{
-				SendEmoteMessage m = netMsg.ReadMessage<SendEmoteMessage> ();
-				sendAllClientEmote(netMsg.conn.connectionId, m.emoteType);
+				SendEmoteMessageAndClientID m = netMsg.ReadMessage<SendEmoteMessageAndClientID> ();
+				sendAllClientEmote(m.netId, m.emoteType);
 				Debug.Log ("Emote Received from Client.");
 			}
 			break;

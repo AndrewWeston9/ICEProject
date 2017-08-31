@@ -26,6 +26,32 @@ class BlockAddMessage : MessageBase
 	public int blocktype;
 }
 
+/// Message for a player sending a single emote to the server.
+class SendEmoteMessage : MessageBase
+{
+	public int emoteType;
+}
+
+class SendEmoteMessageAndClientID : MessageBase
+{
+	public int emoteType;
+	public NetworkInstanceId netId;
+}
+
+class PlayerListMessage : MessageBase
+{
+	public int connectionId;
+	//public ClientDetails cd;
+}
+
+/// Struct for storing active emotes
+/// Delete this in future. No longer needed.
+public struct ActiveEmotesStruct
+{
+	public byte emoteType;
+	public int connId;
+}
+
 
 /// A local level block represents a component of the environment
 /// in which the player exists. The complete environment will consist
@@ -60,6 +86,9 @@ public class LocalWorld : NetworkBehaviour {
     /// Define the distance about the player that we
     /// are interested in seeing things.
     public float viewRadius;
+
+	//declare new emotedisplayclass for displaying incoming emotes.
+	public static EmoteDisplayClass emoteDisplayer;
     
     /// Local level cache.
     private List<LocalLevelBlock> levelStructure; 
@@ -75,6 +104,8 @@ public class LocalWorld : NetworkBehaviour {
         foundPlayer = false;
         
         Debug.Log ("Local world level instance started");
+
+		emoteDisplayer = new EmoteDisplayClass();
 
 //        ClientScene.AddPlayer (0);
     }
@@ -153,6 +184,7 @@ public class LocalWorld : NetworkBehaviour {
         Debug.Log ("On Client start " + NetworkClient.allClients);
                 
         NetworkClient.allClients[0].RegisterHandler (LevelMsgType.LevelResponse, ServerCommandHandler);
+		NetworkClient.allClients[0].RegisterHandler (LevelMsgType.EmoteSingleSender, ServerCommandHandler); // Handle incoming emotes from server
     }
     
     // Update is called once per frame
@@ -232,6 +264,15 @@ public class LocalWorld : NetworkBehaviour {
 				
 			}
 			break;
+
+			case LevelMsgType.EmoteSingleSender:
+				/// Handle incoming emotes from server
+			{
+				SendEmoteMessageAndClientID m = netMsg.ReadMessage<SendEmoteMessageAndClientID> ();
+				displayEmote(m.emoteType, m.netId);
+				Debug.Log ("Incoming emote to client from server from network id: " + m.netId);
+			}
+			break;
             
             default:
             {
@@ -241,7 +282,12 @@ public class LocalWorld : NetworkBehaviour {
         }
     }
     
-    // Add a new block at the given position. The intent is to allow players to immediately
+	public void displayEmote(int emoteType, NetworkInstanceId netId)
+	{
+		emoteDisplayer.displayEmote (emoteType, netId);
+	}
+
+	// Add a new block at the given position. The intent is to allow players to immediately
     // reflect actions in the local game, which may eventually be replaced when the update
     // is returned from the server.
 	public void placeBlock (float x, float z, float height, int type)
@@ -346,4 +392,86 @@ public class LocalWorld : NetworkBehaviour {
         availablePosition = new Vector3 (0.0f, 0.0f, 0.0f);
         return false;
     }
+
+	/// Method for use by EmoteWheel.cs to send an emote to the server.
+	/*public static void sendEmote(int emote)
+	{
+		SendEmoteMessage m = new SendEmoteMessage ();
+		m.emoteType = emote;
+		NetworkManager.singleton.client.Send (LevelMsgType.EmoteSingleReceiver, m);
+	}*/
+}
+
+public class EmoteDisplayClass : ScriptableObject
+{
+	public List<EmoteButton> buttons;
+	private Vector2 Mouseposition;
+	private Vector2 fromVector2M;
+	private Vector2 centercirlce;
+	private Vector2 toVector2M;
+	public Sprite sprite1;
+	public Sprite sprite2;
+	public Sprite sprite3;
+	public Sprite sprite4;
+	public float EmoteLifetime;
+	private bool menuon;
+	public int menuItems;
+
+	public void Awake()
+	{
+		sprite1 = Resources.Load<Sprite>("Sprites/Emotes/sq1");
+		sprite2 = Resources.Load<Sprite>("Sprites/Emotes/sq2");
+		sprite3 = Resources.Load<Sprite>("Sprites/Emotes/sq3");
+		sprite4 = Resources.Load<Sprite>("Sprites/Emotes/sq4");
+		EmoteLifetime = 2;
+		centercirlce = new Vector2(0.5f, 0.5f);
+		fromVector2M = new Vector2(0.5f, 1.0f);
+		buttons = new List<EmoteButton>();
+	}
+
+	public void displayEmote(int emoteType, NetworkInstanceId netId)
+	{
+		GameObject Player = ClientScene.FindLocalObject(netId);
+		//int InstanceID = Player.GetComponent (NetworkInstanceId);
+		//string netID = Player.GetComponent<NetworkIdentity>().netId.ToString();
+		Debug.Log ("Player network ID Received by client: " + Player.GetComponent<NetworkIdentity>().netId.ToString());
+		Vector3 offset = new Vector3(0.0f, 2.0f, 0.0f);
+
+		if (emoteType == 0)
+		{
+			GameObject emoteobject = new GameObject("Emote");
+			SpriteRenderer renderer = emoteobject.AddComponent<SpriteRenderer>();
+			IconObject qwe = emoteobject.AddComponent<IconObject>();
+			qwe.PlayerNetID (netId);
+			renderer.sprite = sprite1;
+			Destroy(emoteobject, EmoteLifetime);
+		}
+		else if (emoteType == 1)
+		{
+			GameObject emoteobject = new GameObject("Emote");
+			SpriteRenderer renderer = emoteobject.AddComponent<SpriteRenderer>();
+			IconObject qwe = emoteobject.AddComponent<IconObject>();
+			qwe.PlayerNetID (netId);
+			renderer.sprite = sprite2;
+			Destroy(emoteobject, EmoteLifetime);
+		}
+		else if (emoteType == 2)
+		{
+			GameObject emoteobject = new GameObject("Emote");
+			SpriteRenderer renderer = emoteobject.AddComponent<SpriteRenderer>();
+			IconObject qwe = emoteobject.AddComponent<IconObject>();
+			qwe.PlayerNetID (netId);
+			renderer.sprite = sprite3;
+			Destroy(emoteobject, EmoteLifetime);
+		}
+		else if (emoteType == 3)
+		{
+			GameObject emoteobject = new GameObject("Emote");
+			SpriteRenderer renderer = emoteobject.AddComponent<SpriteRenderer>();
+			IconObject qwe = emoteobject.AddComponent<IconObject>();
+			qwe.PlayerNetID (netId);
+			renderer.sprite = sprite4;
+			Destroy(emoteobject, EmoteLifetime);
+		}
+	}
 }

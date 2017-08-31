@@ -413,6 +413,12 @@ public class LevelMsgType {
 
 	/// Send a current list of players actively on the server.
 	public const short PlayerList = MsgType.Highest + 4;
+
+	/// Receiving a single emote from a player.
+	public const short EmoteSingleReceiver = MsgType.Highest + 5;
+
+	/// Send emote and playerID of emote sender to each client.
+	public const short EmoteSingleSender = MsgType.Highest + 6;
 };
 
 /// For each client, keep track of which regions are within a zone of interest.
@@ -557,6 +563,8 @@ public class WorldManager : NetworkBehaviour {
         Debug.Log ("World notes server started");
         NetworkServer.RegisterHandler (LevelMsgType.LevelRequest, ClientCommandHandler);
         NetworkServer.RegisterHandler (LevelMsgType.LevelUpdate, ClientCommandHandler);
+		NetworkServer.RegisterHandler (LevelMsgType.EmoteSingleReceiver, ClientCommandHandler); //Client handler for incoming Emotes from clients
+		NetworkServer.RegisterHandler (LevelMsgType.EmoteSingleSender, ClientCommandHandler); // Handler for sending each client a copy of an emote with sender id attached.
         
 //         Debug.Log ("Spawn local on each client");
 //         
@@ -599,9 +607,27 @@ public class WorldManager : NetworkBehaviour {
     }
 
 	//Send clients updated lists of all players
-	void sendPlayerList (int connectionId)
+	/*void sendPlayerList (int connectionId)
 	{
-		
+		foreach(KeyValuePair<int, ClientDetails> entry in playerMonitoring)
+		{
+			PlayerListMessage m = new PlayerListMessage ();
+			m.emoteType = emote;
+			m.connId = connId;
+			NetworkServer.SendToClient (entry.Key, LevelMsgType.EmoteSingleSender, m);
+		}
+	}*/
+
+	//Send all clients an emote
+	void sendAllClientEmote(NetworkInstanceId netId, int emote)
+	{
+		foreach(KeyValuePair<int, ClientDetails> entry in playerMonitoring)
+		{
+				SendEmoteMessageAndClientID m = new SendEmoteMessageAndClientID ();
+				m.emoteType = emote;
+				m.netId = netId;
+				NetworkServer.SendToClient (entry.Key, LevelMsgType.EmoteSingleSender, m);
+		}
 	}
     
     /// Send an update to the player identified by the given connection ID. Work out
@@ -699,7 +725,16 @@ public class WorldManager : NetworkBehaviour {
 				levelStructure.setBlock (m.px + 0.5f, m.pz + 0.5f, m.height, m.blocktype);
             }
             break;
-            
+
+			case LevelMsgType.EmoteSingleSender:
+				/// Receiving a single emote from a player.
+			{
+				SendEmoteMessageAndClientID m = netMsg.ReadMessage<SendEmoteMessageAndClientID> ();
+				sendAllClientEmote(m.netId, m.emoteType);
+				Debug.Log ("Emote Received from Client.");
+			}
+			break;
+
             default:
             {
                 Debug.Log ("Unexpected message type");

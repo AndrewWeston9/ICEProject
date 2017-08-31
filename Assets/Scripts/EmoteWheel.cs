@@ -1,11 +1,8 @@
-﻿
-
-  using UnityEngine; 
-  using System.Collections; 
-  using System.Collections.Generic; 
-  using UnityEngine.UI;
-
-
+﻿using UnityEngine; 
+using System.Collections; 
+using System.Collections.Generic; 
+using UnityEngine.UI;
+using UnityEngine.Networking;
 
 
 public class EmoteWheel : MonoBehaviour
@@ -94,84 +91,38 @@ public class EmoteWheel : MonoBehaviour
     public void ButtonAction()
     {
         buttons[CurMenuItem].sceneimage.color = buttons[CurMenuItem].PressedColor;
-        GameObject Player = GameObject.Find("Player(Clone)");
+		GameObject Player = this.transform.parent.gameObject;
+		NetworkInstanceId netID = Player.GetComponent<NetworkIdentity>().netId;
+		Debug.Log ("Sending emote with networkID: " + netID.ToString());
         Vector3 offset = new Vector3(0.0f, 2.0f, 0.0f);
-        IconObject DisplayEmote;
-        //RED
+        //IconObject DisplayEmote;
         if (CurMenuItem == 0)
         {
-
-            GameObject emoteobject = new GameObject("Emote");
-            SpriteRenderer renderer = emoteobject.AddComponent<SpriteRenderer>();
-            IconObject qwe = emoteobject.AddComponent<IconObject>();
-            renderer.sprite = sprite1;
-            Destroy(emoteobject, EmoteLifetime);
-
-            /*
-            print("You have pressed the first button");
-            GameObject emoteobject = new GameObject("Emote");
-            SpriteRenderer renderer = emoteobject.AddComponent<SpriteRenderer>();
-            renderer.sprite = sprite1;
-            Destroy(emoteobject, EmoteLifetime);
-           
-            emoteobject.transform.position = (Player.transform.position) + offset;
-            emoteobject.transform.rotation = Quaternion.LookRotation(-Camera.main.transform.forward);
-            */
-
+			SendEmoteMessageAndClientID m = new SendEmoteMessageAndClientID();
+			m.emoteType = 0;
+			m.netId = netID;
+			NetworkManager.singleton.client.Send (LevelMsgType.EmoteSingleSender, m);
         }
         else if (CurMenuItem == 1)
         {
-            GameObject emoteobject = new GameObject("Emote");
-            SpriteRenderer renderer = emoteobject.AddComponent<SpriteRenderer>();
-            IconObject qwe = emoteobject.AddComponent<IconObject>();
-            renderer.sprite = sprite2;
-            Destroy(emoteobject, EmoteLifetime);
-
-
+			SendEmoteMessageAndClientID m = new SendEmoteMessageAndClientID();
+			m.emoteType = 1;
+			m.netId = netID;
+			NetworkManager.singleton.client.Send (LevelMsgType.EmoteSingleSender, m);
         }
         else if (CurMenuItem == 2)
         {
-       
-
-
-            GameObject emoteobject = new GameObject("Emote");
-            SpriteRenderer renderer = emoteobject.AddComponent<SpriteRenderer>();
-            IconObject qwe = emoteobject.AddComponent<IconObject>();
-            renderer.sprite = sprite3;
-            Destroy(emoteobject, EmoteLifetime);
-
-
-
+			SendEmoteMessageAndClientID m = new SendEmoteMessageAndClientID();
+			m.emoteType = 2;
+			m.netId = netID;
+			NetworkManager.singleton.client.Send (LevelMsgType.EmoteSingleSender, m);
         }
         else if (CurMenuItem == 3)
         {
-            print("You have pressed the fourth button");
-            // GameObject NewEmote = Instantiate(EmoteObject);
-            // var Iconclass = new IconObject();
-
-           
-            GameObject emoteobject = new GameObject("Emote");
-            SpriteRenderer renderer = emoteobject.AddComponent<SpriteRenderer>();
-            IconObject qwe = emoteobject.AddComponent<IconObject>();
-            renderer.sprite = sprite4;
-            Destroy(emoteobject, EmoteLifetime);
-
-            //SpriteRenderer renderer =NewEmote.AddComponent<SpriteRenderer>();
-            //renderer.sprite = sprite3;
-
-            /*
-              GameObject emoteobject = new GameObject("Emote");
-              SpriteRenderer renderer = emoteobject.AddComponent<SpriteRenderer>();
-              renderer.sprite = sprite4;
-              Destroy(emoteobject, EmoteLifetime);
-
-              emoteobject.transform.position = (Player.transform.position) + offset;
-              emoteobject.transform.rotation = Quaternion.LookRotation(-Camera.main.transform.forward);
-            */
-
-
-
-
+			SendEmoteMessageAndClientID m = new SendEmoteMessageAndClientID();
+			m.emoteType = 3;
+			m.netId = netID;
+			NetworkManager.singleton.client.Send (LevelMsgType.EmoteSingleSender, m);
         }
 
         menuon = false;
@@ -179,42 +130,49 @@ public class EmoteWheel : MonoBehaviour
 }
 
 
- public class IconObject : MonoBehaviour
+public class IconObject : MonoBehaviour
 {
 
-    public void GetSprite(Sprite z)
-    {
-        //Emotetype = z;
-       
-    }
-   public GameObject EmotePicture;
-    GameObject Player;
-    Vector3 offset = new Vector3(0.0f, 2.0f, 0.0f);
-   // public Sprite Emotetype;
-   // SpriteRenderer SR;
+	public void GetSprite(Sprite z)
+	{
+		//Emotetype = z;
 
-  
-    public float lifetime = 2.0f;
-    
-    void Start()
-    {
-         Player = GameObject.Find("Player(Clone)");
-        Destroy(this, 2);
-        print("New object created");
-        // GameObject go = new GameObject("Test");
-        //SpriteRenderer renderer = EmotePicture.AddComponent<SpriteRenderer>();
-        
-    }
+	}
+	public GameObject EmotePicture;
+	GameObject Player;
+	Vector3 offset = new Vector3(0.0f, 2.0f, 0.0f);
+	// public Sprite Emotetype;
+	// SpriteRenderer SR;
+	NetworkInstanceId NetID;
 
-    void Update()
-    {
-        //SR.sprite = Emotetype;
-        transform.position = (Player.transform.position) + offset;
-        transform.rotation = Quaternion.LookRotation(-Camera.main.transform.forward);
-        print("Object updating");
-    }
+	public float lifetime = 2.0f;
+
+	public void PlayerNetID (NetworkInstanceId netId)
+	{
+		NetID = netId;
+		Player = ClientScene.FindLocalObject(NetID);
+	}
+
+	void Start()
+	{
+		//Player = GameObject.Find("Player(Clone)");
+		//Player = ClientScene.FindLocalObject(NetID);
+		Destroy(this, 2);
+		print("New object created");
+		// GameObject go = new GameObject("Test");
+		//SpriteRenderer renderer = EmotePicture.AddComponent<SpriteRenderer>();
+
+	}
+
+	void Update()
+	{
+		//SR.sprite = Emotetype;
+		transform.position = (Player.transform.position) + offset;
+		transform.rotation = Quaternion.LookRotation(-Camera.main.transform.forward);
+		print("Object updating");
+	}
 }
-
+	
 
 [System.Serializable]
 public class EmoteButton
@@ -226,7 +184,3 @@ public class EmoteButton
     public Color HighlightedColor = Color.grey;
     public Color PressedColor = Color.red;
 }
-
-
-
-

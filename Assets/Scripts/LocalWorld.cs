@@ -419,10 +419,10 @@ public class EmoteDisplayClass : ScriptableObject
 
 	public void Awake()
 	{
-		sprite1 = Resources.Load<Sprite>("Sprites/Emotes/sq1");
-		sprite2 = Resources.Load<Sprite>("Sprites/Emotes/sq2");
-		sprite3 = Resources.Load<Sprite>("Sprites/Emotes/sq3");
-		sprite4 = Resources.Load<Sprite>("Sprites/Emotes/sq4");
+		sprite1 = Resources.Load<Sprite>("Sprites/Emotes/HappySprite");
+		sprite2 = Resources.Load<Sprite>("Sprites/Emotes/SadSprite");
+		sprite3 = Resources.Load<Sprite>("Sprites/Emotes/HelloSprite");
+		sprite4 = Resources.Load<Sprite>("Sprites/Emotes/EmergencySprite");
 		EmoteLifetime = 2;
 		centercirlce = new Vector2(0.5f, 0.5f);
 		fromVector2M = new Vector2(0.5f, 1.0f);
@@ -435,7 +435,7 @@ public class EmoteDisplayClass : ScriptableObject
 		//int InstanceID = Player.GetComponent (NetworkInstanceId);
 		//string netID = Player.GetComponent<NetworkIdentity>().netId.ToString();
 		Debug.Log ("Player network ID Received by client: " + Player.GetComponent<NetworkIdentity>().netId.ToString());
-		Vector3 offset = new Vector3(0.0f, 2.0f, 0.0f);
+		Vector3 offset = new Vector3(0.0f, 1.5f, 0.0f);
 
 		if (emoteType == 0)
 		{

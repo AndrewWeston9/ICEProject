@@ -140,7 +140,7 @@ public class IconObject : MonoBehaviour
 	}
 	public GameObject EmotePicture;
 	GameObject Player;
-	Vector3 offset = new Vector3(0.0f, 2.0f, 0.0f);
+	Vector3 offset = new Vector3(0.0f, 1.5f, 0.0f);
 	// public Sprite Emotetype;
 	// SpriteRenderer SR;
 	NetworkInstanceId NetID;

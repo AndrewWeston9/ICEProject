@@ -6,6 +6,7 @@ using System;
 /// Player object management.
 public class PlayerMove : NetworkBehaviour
 {
+
 	/// A link to the local level representation,which can be
 	/// queried for any player control operations.
 	protected LocalWorld localWorld;
@@ -27,8 +28,6 @@ public class PlayerMove : NetworkBehaviour
 		localWorld = lw;
 		//       Debug.Log ("Add block " + localWorld); 
 	}
-
-
 
 	/// Actions on each update of the player:
 	///   - handle key presses
@@ -133,6 +132,9 @@ public class PlayerMove : NetworkBehaviour
 
 			Debug.Log ("place at " + px + " " + pz + " " + py);
 			localWorld.placeBlock (px, pz, py, currentBlockType);
+			
+			//Quest Manager log
+			QuestManager.qManager.AddQItem("Place a block", 1);
 
 			y = 0.2f;
 			transform.Translate(0, 1, 0);

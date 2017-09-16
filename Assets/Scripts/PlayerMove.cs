@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.Networking;
-
+using System.Collections;
+using System.Collections.Generic;
 using System;
 
 /// Player object management.
@@ -10,7 +11,6 @@ public class PlayerMove : NetworkBehaviour
 	/// A link to the local level representation,which can be
 	/// queried for any player control operations.
 	protected LocalWorld localWorld;
-
 
 	/// Manage when a block is attached to an edge of the world.
 	protected bool attached;
@@ -178,10 +178,7 @@ public class PlayerMove : NetworkBehaviour
 
 
 		}
-
-
-
-
+		
 		/// Turn and move forward.
 		//var x = Input.GetAxis("Horizontal") * Time.deltaTime * 150.0f;
 		//var z = Input.GetAxis("Vertical") * Time.deltaTime * 3.0f;
@@ -266,7 +263,5 @@ public class PlayerMove : NetworkBehaviour
 			}
 		}
 	}
-
-
 
 }

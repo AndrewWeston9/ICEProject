@@ -7,7 +7,7 @@ using System.Collections.Generic;
 public class PlayerState : NetworkBehaviour {
     
     private const float barSize = 0.2f;
-    
+
 //     [SyncVar(hook = "OnChangeResourceLevels")]
     public SyncListFloat resourceLevels = new SyncListFloat ();
     [SyncVar(hook = "OnChangeResources")]
@@ -19,6 +19,14 @@ public class PlayerState : NetworkBehaviour {
     /// The actual objects used as part of the bar displaying level of resources.
     private GameObject [] resourceDisplayObjects = null;
     
+	bool inTrigger;
+
+	string ResourceName;
+
+	Vector3 ResourcePosition;
+
+	GameObject playerObject;
+
     // Use this for initialization
     void Start () {
         resourceLevels.Add (0.34f);
@@ -26,7 +34,34 @@ public class PlayerState : NetworkBehaviour {
         resourceLevels.Add (0.07f);
         
         OnChangeResourceLevels (resourceLevels);
+
+		inTrigger = false;
+		ResourceName = "";
+		ResourcePosition = new Vector3 ();
     }
+
+	void Update()
+	{
+		if (inTrigger == true && Input.GetKeyDown (KeyCode.G))
+		{
+			takeResource ();
+		}
+	}
+
+	// Update is called once per frame
+	/*void Update () {
+		if (inTrigger == true && Input.GetKeyDown (KeyCode.G))
+		{
+			//Debug.LogError ("In resource trigger range!!!!!!!!!!!!!!!!!!!!!!");
+			if (ResourceName == "WoodResourceBrick(Clone)")
+			{
+				changeResource (0, 0.05f);
+				ResourceTakeMessage m = new ResourceTakeMessage ();
+				m.position = ResourcePosition;
+				NetworkManager.singleton.client.Send (LevelMsgType.ResourceUpdate, m);  
+			}
+		}
+	}*/
     
     public void changeResource (int resourceType, float deltaResource)
     {
@@ -92,5 +127,47 @@ public class PlayerState : NetworkBehaviour {
             position += barSize;
         }
     }
-    
+
+	public void takeResource()
+	{
+		if (ResourceName == "WoodResourceBrick(Clone)")
+		{
+			//Debug.LogError ("In resource trigger range!!!!!!!!!!!!!!!!!!!!!!");
+			changeResource (0, 0.05f);
+			inTrigger = false;
+			ResourceTakeMessage m = new ResourceTakeMessage ();
+			m.position = ResourcePosition;
+			NetworkManager.singleton.client.Send (LevelMsgType.ResourceUpdate, m);  
+		}
+	}
+
+	void OnTriggerEnter(Collider other)
+	{
+		if(other.gameObject.tag == "Resource")
+		{
+			inTrigger = true;
+			ResourceName = other.name;
+			ResourcePosition = other.gameObject.transform.position;
+			playerObject = other.transform.parent.gameObject;
+		}
+	}
+
+	void OnTriggerStay(Collider other)
+	{
+		if(other.gameObject.tag == "Resource")
+		{
+			inTrigger = true;
+			ResourceName = other.name;
+			ResourcePosition = other.gameObject.transform.position;
+			playerObject = other.transform.parent.gameObject;
+		}
+	}
+
+	void OnTriggerExit(Collider other)
+	{
+		if (other.tag == "Resource")
+		{
+			inTrigger = false;
+		}
+	}
 }

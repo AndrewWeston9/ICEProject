@@ -60,7 +60,7 @@ public class ResourceProducer : MonoBehaviour {
         }
     }
     
-    void OnTriggerStay (Collider collision)
+    /*void OnTriggerStay (Collider collision)
     {
         var hit = collision.transform.parent.gameObject; // if hitting a player shape, get the player (parent).
         var playerState = hit.GetComponent<PlayerState>();
@@ -77,7 +77,7 @@ public class ResourceProducer : MonoBehaviour {
             resourceAmount -= amountHarvested;
             updateResourceLevels ();
         }
-    }
+    }*/
     
     void Update() 
     {

@@ -111,6 +111,7 @@ public class RegionBlock : MessageBase
                     if (k < zc)
                     {
 						blockStructure[getIndex (i, j, k)].brickType = 1;
+						blockStructure [getIndex (i, j, k)].brickHealth = 1;
                     }
                     else
                     {
@@ -206,7 +207,27 @@ public class RegionBlock : MessageBase
             (z >= 0) && (z < MaxBlockHeight))
         {
 			blockStructure[getIndex (x, y, z)].brickType = type;
-			blockStructure[getIndex (x, y, z)].brickHealth = 5;
+			if (type == 1) {
+				blockStructure[getIndex (x, y, z)].brickHealth = 1;
+			}
+			if (type == 2) {
+				blockStructure[getIndex (x, y, z)].brickHealth = 3;
+			}
+			if (type == 3) {
+				blockStructure[getIndex (x, y, z)].brickHealth = 5;
+			}
+			if (type == 4) {
+				blockStructure[getIndex (x, y, z)].brickHealth = 10;
+			}
+			if (type == 5) {
+				blockStructure[getIndex (x, y, z)].brickHealth = 2;
+			}
+			if (type == 6) {
+				blockStructure[getIndex (x, y, z)].brickHealth = 100;
+			}
+			if (type == 7) {
+				blockStructure[getIndex (x, y, z)].brickHealth = 100;
+			}
 //              Debug.Log ("Setting " + x + " " + y + " " + z);
             updateTimeStamp ();
         }
@@ -224,6 +245,40 @@ public class RegionBlock : MessageBase
         }
         return 0;
     }
+
+	/// Get the health value for the block at a given region block position.
+	public int getBlockHealth (int x, int y, int z)
+	{
+		if ((x >= 0) && (x < blockSize) && 
+			(y >= 0) && (y < blockSize) &&
+			(z >= 0) && (z < MaxBlockHeight))
+		{
+			return blockStructure[getIndex (x, y, z)].brickHealth;
+		}
+		return 0;
+	}
+	public void updateBlockHealth(int x, int y, int z)
+	{
+		if ((x >= 0) && (x < blockSize) && 
+			(y >= 0) && (y < blockSize) &&
+			(z >= 0) && (z < MaxBlockHeight))
+		{
+			blockStructure[getIndex (x, y, z)].brickHealth = blockStructure[getIndex (x, y, z)].brickHealth - 1;
+			//Debug.LogError ("updating block health");
+		}
+	}
+
+	public void deleteBlock(int x, int y, int z)
+	{
+		if ((x >= 0) && (x < blockSize) && 
+			(y >= 0) && (y < blockSize) &&
+			(z >= 0) && (z < MaxBlockHeight))
+		{
+			blockStructure[getIndex (x, y, z)].brickType = 0;
+			blockStructure[getIndex (x, y, z)].brickHealth = 0;
+		}
+		updateTimeStamp ();
+	}
     
     /// Modify the scene to draw a brick at the given coordinates. Really nothing to do
     /// with a region block and could be transferred to an appropriate view class.
@@ -239,10 +294,19 @@ public class RegionBlock : MessageBase
     /// Build up a local copy of the scene from information in the region block. Also needs to end
     /// up in a view class, using appropriate methods to query the RegionBlock information.
     
+
+
     /// Removes all current views of that block.
-	public void placeBlocks (GameObject block, GameObject block2, GameObject block3, Transform parentObjectTransform)
+	public void placeBlocks (Transform parentObjectTransform)
     {
-        for (int i = parentObjectTransform.childCount - 1; i >= 0; i--)
+		//Load brick gameobjects
+		GameObject GrassBrick = Resources.Load<GameObject>("Bricks/GrassBrick");
+		GameObject TimberBrick = Resources.Load<GameObject>("Bricks/TimberBrick");
+		GameObject BrickBrick = Resources.Load<GameObject>("Bricks/BrickBrick");
+
+		GameObject WoodResourceBrick = Resources.Load<GameObject> ("Bricks/WoodResourceBrick");
+
+		for (int i = parentObjectTransform.childCount - 1; i >= 0; i--)
         {
             Transform child = parentObjectTransform.GetChild (i);
             UnityEngine.Object.Destroy(child.gameObject);
@@ -258,19 +322,43 @@ public class RegionBlock : MessageBase
 					if (blockStructure[getIndex (i, j, k)].brickType == 1)
                     {
                         Vector3 pos = new Vector3 (i, j, k);
-                        placeSingleBlock (block, pos, parentObjectTransform);
+                        placeSingleBlock (GrassBrick, pos, parentObjectTransform);
                         //                   Debug.Log ("Block at " + i + " , " + j);
                     }
 					if (blockStructure[getIndex (i, j, k)].brickType == 2)
 					{
 						Vector3 pos = new Vector3 (i, j, k);
-						placeSingleBlock (block2, pos, parentObjectTransform);
+						placeSingleBlock (TimberBrick, pos, parentObjectTransform);
 						//                   Debug.Log ("Block at " + i + " , " + j);
 					}
 					if (blockStructure[getIndex (i, j, k)].brickType == 3)
 					{
 						Vector3 pos = new Vector3 (i, j, k);
-						placeSingleBlock (block3, pos, parentObjectTransform);
+						placeSingleBlock (BrickBrick, pos, parentObjectTransform);
+						//                   Debug.Log ("Block at " + i + " , " + j);
+					}
+					if (blockStructure[getIndex (i, j, k)].brickType == 4)
+					{
+						Vector3 pos = new Vector3 (i, j, k);
+						placeSingleBlock (BrickBrick, pos, parentObjectTransform);
+						//                   Debug.Log ("Block at " + i + " , " + j);
+					}
+					if (blockStructure[getIndex (i, j, k)].brickType == 5)
+					{
+						Vector3 pos = new Vector3 (i, j, k);
+						placeSingleBlock (WoodResourceBrick, pos, parentObjectTransform);
+						//                   Debug.Log ("Block at " + i + " , " + j);
+					}
+					if (blockStructure[getIndex (i, j, k)].brickType == 6)
+					{
+						Vector3 pos = new Vector3 (i, j, k);
+						placeSingleBlock (BrickBrick, pos, parentObjectTransform);
+						//                   Debug.Log ("Block at " + i + " , " + j);
+					}
+					if (blockStructure[getIndex (i, j, k)].brickType == 7)
+					{
+						Vector3 pos = new Vector3 (i, j, k);
+						placeSingleBlock (BrickBrick, pos, parentObjectTransform);
 						//                   Debug.Log ("Block at " + i + " , " + j);
 					}
                 }
@@ -395,6 +483,30 @@ public class LevelStructure
         
         refreshMesh ();
     }
+
+	/// Update a change of resource in the level structure.
+	public void updateResource(float x, float y, float z)
+	{
+		int rx = ((int) x) % blockSize;
+		int ry = ((int) y) % blockSize;
+		int rz = ((int) z);
+
+		RegionBlock rb = getRegion (x, y);
+
+		if (rb != null)
+		{
+			rb.updateBlockHealth (rx, ry, rz);
+			int blockHealth = rb.getBlockHealth (rx, ry, rz);
+			//Debug.LogError ("Health of block: " + blockHealth.ToString ());
+			if (blockHealth < 1)
+			{
+				rb.deleteBlock(rx, ry, rz);
+				refreshMesh ();
+			}
+		}
+
+		refreshMesh ();
+	}
 }
 
 /// Messages used for client/server synchronization to maintain the level
@@ -419,6 +531,9 @@ public class LevelMsgType {
 
 	/// Send emote and playerID of emote sender to each client.
 	public const short EmoteSingleSender = MsgType.Highest + 6;
+
+	/// Send Resource update from client to server.
+	public const short ResourceUpdate = MsgType.Highest + 7;
 };
 
 /// For each client, keep track of which regions are within a zone of interest.
@@ -539,8 +654,24 @@ public class WorldManager : NetworkBehaviour {
         
         levelStructure = new LevelStructure (mapPattern, blockSize);
         
-        levelStructure.convertToMesh (regionBlank, transform);        
+		levelStructure.convertToMesh (regionBlank, transform);
+
+		resourceBrickGenerator();
+
+		levelStructure.refreshMesh ();
     }
+
+	/// Resource brick generator.
+	/// Randomly generates resources and adds them to the brickstructure[].
+	public void resourceBrickGenerator()
+	{
+		for (int i = 0; i < 100; i++)
+		{
+			Vector3 pos = new Vector3 ((int) UnityEngine.Random.Range (0f, 100.0f) + 0.5f, Math.Max ((int) (UnityEngine.Random.Range (0f, 12.0f)), (int) WorldManager.minLevelHeight), (int) UnityEngine.Random.Range (0f, 100.0f) + 0.5f);
+			int blockHeight = (int) (pos.y - WorldManager.minLevelHeight);
+			levelStructure.setBlock(pos.x + 0.5f, pos.z + 0.5f, blockHeight, 5);
+		}
+	}
     
     // Called when a level containing a world manager is started. Then
     // get this to connect to the server.
@@ -565,6 +696,7 @@ public class WorldManager : NetworkBehaviour {
         NetworkServer.RegisterHandler (LevelMsgType.LevelUpdate, ClientCommandHandler);
 		NetworkServer.RegisterHandler (LevelMsgType.EmoteSingleReceiver, ClientCommandHandler); //Client handler for incoming Emotes from clients
 		NetworkServer.RegisterHandler (LevelMsgType.EmoteSingleSender, ClientCommandHandler); // Handler for sending each client a copy of an emote with sender id attached.
+		NetworkServer.RegisterHandler (LevelMsgType.ResourceUpdate, ClientCommandHandler); // Handler for sending the server a resource update.
         
 //         Debug.Log ("Spawn local on each client");
 //         
@@ -732,6 +864,15 @@ public class WorldManager : NetworkBehaviour {
 				SendEmoteMessageAndClientID m = netMsg.ReadMessage<SendEmoteMessageAndClientID> ();
 				sendAllClientEmote(m.netId, m.emoteType);
 				Debug.Log ("Emote Received from Client.");
+			}
+			break;
+
+			case LevelMsgType.ResourceUpdate:
+			{
+				ResourceTakeMessage m = netMsg.ReadMessage<ResourceTakeMessage> ();
+				int height = Math.Max ((int) (m.position.y), (int) WorldManager.minLevelHeight);
+				int blockHeight = (int) (height - WorldManager.minLevelHeight);
+				levelStructure.updateResource (m.position.x + 0.5f, m.position.z + 0.5f, blockHeight);
 			}
 			break;
 

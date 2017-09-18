@@ -157,6 +157,10 @@ public class PlayerMove : NetworkBehaviour
 		{
 			currentBlockType = 3;
 		}
+		if (Input.GetKey (KeyCode.Alpha4))
+		{
+			currentBlockType = 4;
+		}
 
 		//Pick up 
 

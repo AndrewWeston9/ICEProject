@@ -22,10 +22,10 @@ GameObject:
   - component: {fileID: 33751220010660276}
   - component: {fileID: 65072738033956926}
   - component: {fileID: 23744796034251820}
-  - component: {fileID: 65177853495804964}
+  - component: {fileID: 95704321135152188}
   m_Layer: 0
-  m_Name: WoodResourceBrick
-  m_TagString: Resource
+  m_Name: CrystalBrick
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -56,7 +56,7 @@ MeshRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_Materials:
-  - {fileID: 2100000, guid: 591d489e261cc3f4aada240163c6082a, type: 2}
+  - {fileID: 2100000, guid: 5a1099d078ab3864b8f745a1343492f0, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -94,15 +94,20 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!65 &65177853495804964
-BoxCollider:
+--- !u!95 &95704321135152188
+Animator:
+  serializedVersion: 3
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1527562966145640}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 1
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 3, y: 3, z: 3}
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Enabled: 0
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 7f0c36da97030492890cc69ddeb5420b, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1

@@ -65,10 +65,10 @@ public class PlayerState : NetworkBehaviour {
     
     public void changeResource (int resourceType, float deltaResource)
     {
-        if (!isServer)
-        {
-            return;
-        }
+        //if (!isServer)
+        //{
+           // return;
+       // }
         
         resourceLevels[resourceType] += deltaResource;
         
@@ -137,6 +137,27 @@ public class PlayerState : NetworkBehaviour {
 			inTrigger = false;
 			ResourceTakeMessage m = new ResourceTakeMessage ();
 			m.position = ResourcePosition;
+			m.amount = -1;
+			NetworkManager.singleton.client.Send (LevelMsgType.ResourceUpdate, m);  
+		}
+		if (ResourceName == "DirtResourceBrick(Clone)")
+		{
+			//Debug.LogError ("In resource trigger range!!!!!!!!!!!!!!!!!!!!!!");
+			changeResource (1, 0.05f);
+			inTrigger = false;
+			ResourceTakeMessage m = new ResourceTakeMessage ();
+			m.position = ResourcePosition;
+			m.amount = -1;
+			NetworkManager.singleton.client.Send (LevelMsgType.ResourceUpdate, m);  
+		}
+		if (ResourceName == "CrystalResourceBrick(Clone)")
+		{
+			//Debug.LogError ("In resource trigger range!!!!!!!!!!!!!!!!!!!!!!");
+			changeResource (2, 0.05f);
+			inTrigger = false;
+			ResourceTakeMessage m = new ResourceTakeMessage ();
+			m.position = ResourcePosition;
+			m.amount = -1;
 			NetworkManager.singleton.client.Send (LevelMsgType.ResourceUpdate, m);  
 		}
 	}

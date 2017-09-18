@@ -24,7 +24,7 @@ GameObject:
   - component: {fileID: 23744796034251820}
   - component: {fileID: 65177853495804964}
   m_Layer: 0
-  m_Name: WoodResourceBrick
+  m_Name: DirtResourceBrick
   m_TagString: Resource
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -56,7 +56,7 @@ MeshRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_Materials:
-  - {fileID: 2100000, guid: 591d489e261cc3f4aada240163c6082a, type: 2}
+  - {fileID: 2100000, guid: 9d910b6546168e543974364ff5a9bfd8, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

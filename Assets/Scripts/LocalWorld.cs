@@ -30,6 +30,7 @@ class BlockAddMessage : MessageBase
 class ResourceTakeMessage : MessageBase
 {
 	public Vector3 position;
+	public int amount;
 }
 
 /// Message for a player sending a single emote to the server.

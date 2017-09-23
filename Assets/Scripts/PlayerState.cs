@@ -19,19 +19,19 @@ public class PlayerState : NetworkBehaviour {
     /// The actual objects used as part of the bar displaying level of resources.
     private GameObject [] resourceDisplayObjects = null;
     
-	bool inTrigger;
+	private bool inTrigger;
 
-	string ResourceName;
+	private string ResourceName;
 
-	Vector3 ResourcePosition;
+	private Vector3 ResourcePosition;
 
-	GameObject playerObject;
+	//GameObject playerObject;
 
     // Use this for initialization
     void Start () {
-        resourceLevels.Add (0.34f);
-        resourceLevels.Add (0.64f);
-        resourceLevels.Add (0.07f);
+        resourceLevels.Add (0.05f);
+        resourceLevels.Add (0.05f);
+        resourceLevels.Add (0.05f);
         
         OnChangeResourceLevels (resourceLevels);
 
@@ -42,10 +42,11 @@ public class PlayerState : NetworkBehaviour {
 
 	void Update()
 	{
-		if (inTrigger == true && Input.GetKeyDown (KeyCode.G))
-		{
-			takeResource ();
-		}
+		// Delete eventually as this is now done in PlayerMove
+		//if (inTrigger == true && Input.GetKeyDown (KeyCode.G))
+		//{
+			//takeResource ();
+		//}
 	}
 
 	// Update is called once per frame
@@ -130,30 +131,33 @@ public class PlayerState : NetworkBehaviour {
 
 	public void takeResource()
 	{
-		if (ResourceName == "WoodResourceBrick(Clone)")
+		if (inTrigger == true && ResourceName == "WoodResourceBrick(Clone)")
 		{
 			//Debug.LogError ("In resource trigger range!!!!!!!!!!!!!!!!!!!!!!");
 			changeResource (0, 0.05f);
+			OnChangeResources (resourceChanged);
 			inTrigger = false;
 			ResourceTakeMessage m = new ResourceTakeMessage ();
 			m.position = ResourcePosition;
 			m.amount = -1;
 			NetworkManager.singleton.client.Send (LevelMsgType.ResourceUpdate, m);  
 		}
-		if (ResourceName == "DirtResourceBrick(Clone)")
+		if (inTrigger == true && ResourceName == "DirtResourceBrick(Clone)")
 		{
 			//Debug.LogError ("In resource trigger range!!!!!!!!!!!!!!!!!!!!!!");
 			changeResource (1, 0.05f);
+			OnChangeResources (resourceChanged);
 			inTrigger = false;
 			ResourceTakeMessage m = new ResourceTakeMessage ();
 			m.position = ResourcePosition;
 			m.amount = -1;
 			NetworkManager.singleton.client.Send (LevelMsgType.ResourceUpdate, m);  
 		}
-		if (ResourceName == "CrystalResourceBrick(Clone)")
+		if (inTrigger == true && ResourceName == "CrystalResourceBrick(Clone)")
 		{
 			//Debug.LogError ("In resource trigger range!!!!!!!!!!!!!!!!!!!!!!");
 			changeResource (2, 0.05f);
+			OnChangeResources (resourceChanged);
 			inTrigger = false;
 			ResourceTakeMessage m = new ResourceTakeMessage ();
 			m.position = ResourcePosition;
@@ -168,8 +172,9 @@ public class PlayerState : NetworkBehaviour {
 		{
 			inTrigger = true;
 			ResourceName = other.name;
-			ResourcePosition = other.gameObject.transform.position;
-			playerObject = other.transform.parent.gameObject;
+			//ResourcePosition = other.gameObject.transform.position;
+			ResourcePosition = other.transform.position;
+			//playerObject = other.transform.parent.gameObject;
 		}
 	}
 
@@ -179,8 +184,9 @@ public class PlayerState : NetworkBehaviour {
 		{
 			inTrigger = true;
 			ResourceName = other.name;
-			ResourcePosition = other.gameObject.transform.position;
-			playerObject = other.transform.parent.gameObject;
+			//ResourcePosition = other.gameObject.transform.position;
+			ResourcePosition = other.transform.position;
+			//playerObject = other.transform.parent.gameObject;
 		}
 	}
 
@@ -189,6 +195,8 @@ public class PlayerState : NetworkBehaviour {
 		if (other.tag == "Resource")
 		{
 			inTrigger = false;
+			ResourceName = "";
+			ResourcePosition = new Vector3();
 		}
 	}
 }

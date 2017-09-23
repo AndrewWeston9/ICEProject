@@ -142,6 +142,14 @@ public class PlayerMove : NetworkBehaviour
 			attached = false;
 		}
 
+		/// Take Resources action.
+		if (Input.GetKeyDown (KeyCode.G))
+		{
+			PlayerState pstate = this.GetComponent<PlayerState> ();
+			pstate.takeResource ();
+			//Debug.LogError ("Taking Resources from playermove!!!");
+		}
+
 
 		/// Change the currentBlockType
 

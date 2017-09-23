@@ -678,7 +678,7 @@ public class WorldManager : NetworkBehaviour {
         
 		levelStructure.convertToMesh (regionBlank, transform);
 
-		resourceBrickGenerator();
+		//resourceBrickGenerator(); //Generate resources on start. Potentially use this in future as a way for the server to generate new resources in the world when the current world runs out/low.
 
 		levelStructure.refreshMesh ();
     }

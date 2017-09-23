@@ -347,7 +347,7 @@ public class LocalWorld : NetworkBehaviour {
         {
           int value;
           bool hasValue = findBlock (new Vector3 (x + offx[i], height, z + offz[i]), out value);
-			if (hasValue && (value == 1 || value == 2 || value == 3))
+			if (hasValue && (value >= 1))
           {
 //              y = (int) WorldManager.minLevelHeight;
               y = height;

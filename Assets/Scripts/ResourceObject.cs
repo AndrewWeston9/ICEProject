@@ -20,7 +20,7 @@ public class ResourceObject : MonoBehaviour {
 			Debug.LogError ("Pressing G!!!!!!!!!!!!!!!!!!!!!!");
 			var hit = collision.transform.parent.gameObject;
 			var playerstate = hit.GetComponent<PlayerState>();
-			playerstate.takeResource ();
+			//playerstate.takeResource ();
 		}
 	}
 

@@ -42,7 +42,7 @@ GameObject:
   - component: {fileID: 114545862425354288}
   - component: {fileID: 54414428741491482}
   - component: {fileID: 114006829538408330}
-  - component: {fileID: 135305468985051138}
+  - component: {fileID: 135876199879288168}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -220,7 +220,7 @@ SphereCollider:
   serializedVersion: 2
   m_Radius: 0.5
   m_Center: {x: 0, y: 0, z: 0}
---- !u!135 &135305468985051138
+--- !u!135 &135876199879288168
 SphereCollider:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}

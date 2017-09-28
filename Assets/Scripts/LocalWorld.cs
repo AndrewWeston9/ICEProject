@@ -26,11 +26,18 @@ class BlockAddMessage : MessageBase
 	public int blocktype;
 }
 
+/// Message sent to the server when resources are taken from a resource brick.
+class ResourceTakeMessage : MessageBase
+{
+	public Vector3 position;
+	public int amount;
+}
+
 /// Message for a player sending a single emote to the server.
-class SendEmoteMessage : MessageBase
+/*class SendEmoteMessage : MessageBase
 {
 	public int emoteType;
-}
+}*/
 
 class SendEmoteMessageAndClientID : MessageBase
 {
@@ -38,19 +45,11 @@ class SendEmoteMessageAndClientID : MessageBase
 	public NetworkInstanceId netId;
 }
 
-class PlayerListMessage : MessageBase
+/*class PlayerListMessage : MessageBase
 {
 	public int connectionId;
 	//public ClientDetails cd;
-}
-
-/// Struct for storing active emotes
-/// Delete this in future. No longer needed.
-public struct ActiveEmotesStruct
-{
-	public byte emoteType;
-	public int connId;
-}
+}*/
 
 
 /// A local level block represents a component of the environment
@@ -64,7 +63,7 @@ public class LocalLevelBlock
 {
     public RegionBlock region;
     public GameObject  gobject;
-	public int blocktype;
+	//public int blocktype;
 }
 
 /// A client equivalent of the Level Structure and World Managers. Cached
@@ -76,12 +75,20 @@ public class LocalWorld : NetworkBehaviour {
     /// local level block. Presumably an empty.
     public GameObject localLevelElement;
     
-    /// The game object used to represent a brick.
+    /// The game object used to represent a default grass/dirt brick.
 	public GameObject localBrick;
-	/// The game object used to represent a wood brick.
-	public GameObject localWoodBrick;
-	/// The game object used to represent a grass brick.
-	public GameObject localGrassBrick;
+	/// The game object used to represent a timber brick.
+	public GameObject localTimberBrick;
+	/// The game object used to represent a brick brick.
+	public GameObject localBrickBrick;
+	/// The game object used to represent a platinum brick.
+	public GameObject localPlatinumBrick;
+	/// The game object used to represent a wood resource brick.
+	public GameObject localWoodResourceBrick;
+	/// The game object used to represent a clay resource brick.
+	public GameObject localClayResourceBrick;
+	/// The game object used to represent a platinum resource brick.
+	public GameObject localPlatinumResourceBrick;
     
     /// Define the distance about the player that we
     /// are interested in seeing things.
@@ -241,7 +248,7 @@ public class LocalWorld : NetworkBehaviour {
                     llb = addLevelBlock (rb, llbpos);
                     
                     // llb should now be valid.
-					llb.region.placeBlocks (localBrick, localGrassBrick, localWoodBrick, llb.gobject.transform);
+					llb.region.placeBlocks (llb.gobject.transform);
                 }
                 else
                 {
@@ -250,7 +257,7 @@ public class LocalWorld : NetworkBehaviour {
                     {
                         llb.region = rb;
 //                         Debug.Log ("Got update ..................................>");
-						llb.region.placeBlocks (localBrick, localGrassBrick, localWoodBrick, llb.gobject.transform);
+						llb.region.placeBlocks (llb.gobject.transform);
                     }
                 }
                 
@@ -340,7 +347,7 @@ public class LocalWorld : NetworkBehaviour {
         {
           int value;
           bool hasValue = findBlock (new Vector3 (x + offx[i], height, z + offz[i]), out value);
-			if (hasValue && (value == 1 || value == 2 || value == 3))
+			if (hasValue && (value >= 1))
           {
 //              y = (int) WorldManager.minLevelHeight;
               y = height;

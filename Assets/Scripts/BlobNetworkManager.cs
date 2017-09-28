@@ -9,7 +9,7 @@ using UnityEngine.Networking;
 public class BlobNetworkManager : NetworkManager {
     
     public GameObject worldManagerPrefab;
-    
+    public GameObject stormCloud;
     public GameObject localLevelPrefab;
     
     public override void OnStartServer ()
@@ -30,7 +30,7 @@ public class BlobNetworkManager : NetworkManager {
     public override void OnStartClient (NetworkClient client)
     {
         base.OnStartClient (client);
-        
+        ClientScene.RegisterPrefab(stormCloud);
         Debug.Log ("Blob client ready");
     }
     

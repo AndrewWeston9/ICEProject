@@ -133,8 +133,9 @@ public class PlayerState : NetworkBehaviour {
 	{
 		if (inTrigger == true && ResourceName == "WoodResourceBrick(Clone)")
 		{
-			//Debug.LogError ("In resource trigger range!!!!!!!!!!!!!!!!!!!!!!");
-			changeResource (0, 0.05f);
+            QuestManager.qManager.AddQItem("Harvest a block", 1);
+            //Debug.LogError ("In resource trigger range!!!!!!!!!!!!!!!!!!!!!!");
+            changeResource (0, 0.05f);
 			OnChangeResources (resourceChanged);
 			inTrigger = false;
 			ResourceTakeMessage m = new ResourceTakeMessage ();
@@ -144,8 +145,9 @@ public class PlayerState : NetworkBehaviour {
 		}
 		if (inTrigger == true && ResourceName == "DirtResourceBrick(Clone)")
 		{
-			//Debug.LogError ("In resource trigger range!!!!!!!!!!!!!!!!!!!!!!");
-			changeResource (1, 0.05f);
+            QuestManager.qManager.AddQItem("Harvest a block", 1);
+            //Debug.LogError ("In resource trigger range!!!!!!!!!!!!!!!!!!!!!!");
+            changeResource (1, 0.05f);
 			OnChangeResources (resourceChanged);
 			inTrigger = false;
 			ResourceTakeMessage m = new ResourceTakeMessage ();
@@ -155,8 +157,9 @@ public class PlayerState : NetworkBehaviour {
 		}
 		if (inTrigger == true && ResourceName == "CrystalResourceBrick(Clone)")
 		{
-			//Debug.LogError ("In resource trigger range!!!!!!!!!!!!!!!!!!!!!!");
-			changeResource (2, 0.05f);
+            QuestManager.qManager.AddQItem("Harvest a block", 1);
+            //Debug.LogError ("In resource trigger range!!!!!!!!!!!!!!!!!!!!!!");
+            changeResource (2, 0.05f);
 			OnChangeResources (resourceChanged);
 			inTrigger = false;
 			ResourceTakeMessage m = new ResourceTakeMessage ();

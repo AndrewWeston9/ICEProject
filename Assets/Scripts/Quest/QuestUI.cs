@@ -13,6 +13,7 @@ public class QuestUI : MonoBehaviour {
     public bool activePanel = false;
     public bool activeQuestLog = false;
 
+	public bool displayLog = true;
 
     public GameObject questPanel;
     public GameObject questLog;
@@ -89,12 +90,16 @@ public class QuestUI : MonoBehaviour {
 	// Update is called once per frame
 	void Update ()
     {
-		if(Input.GetKeyDown(KeyCode.Q))
+		if(Input.GetKeyDown(KeyCode.Q)&&activePanel==false)
         {
-			activeQuestLog = !activeQuestLog;
-			DisplayQLogPanel ();
-			Debug.Log ("Q");
+			
+				activeQuestLog = !activeQuestLog;
+				DisplayQLogPanel ();
+				displayLog = !displayLog;
+
         }
+			
+
 
 	}
 

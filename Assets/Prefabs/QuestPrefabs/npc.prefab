@@ -60,6 +60,7 @@ GameObject:
   - component: {fileID: 65854724119309518}
   - component: {fileID: 114237912113791568}
   - component: {fileID: 54959620592751638}
+  - component: {fileID: 114695144005326836}
   m_Layer: 0
   m_Name: npc
   m_TagString: Untagged
@@ -170,12 +171,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 429b7bb723ada654780d809f94e68566, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  availableIDs: 01000000
-  receivableIDs: 01000000
+  displayq: 0
+  availableIDs: 0100000002000000030000000400000006000000
+  receivableIDs: 0100000002000000030000000500000006000000
   qMarker: {fileID: 1540046025304676}
   qImage: {fileID: 114949410240175968}
-  qAvailableSprite: {fileID: 10901, guid: 0000000000000000f000000000000000, type: 0}
-  qReceivableSprite: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
+  qAvailableSprite: {fileID: 21300000, guid: d759a14620446914880cbbe521f95810, type: 3}
+  qReceivableSprite: {fileID: 21300000, guid: c4173ba7907ef6043a3a37467c1ce79f, type: 3}
 --- !u!114 &114301341654302822
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -192,6 +194,17 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
+--- !u!114 &114695144005326836
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1608262083846900}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 0}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &114786305622479614
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -232,7 +245,7 @@ MonoBehaviour:
       m_Calls: []
     m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: 21300000, guid: d759a14620446914880cbbe521f95810, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1

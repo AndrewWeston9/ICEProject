@@ -52,12 +52,51 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   qList:
-  - Title: Example 1
+  - Title: Tutorial 1
     Qid: 1
     progress: 1
-    desc: Example 1. Place a block
+    desc: Hello Player. Thank you for playing this game. Lets get started by placing
+      a block.
     nxtQuest: 2
     task: Place a block
+    taskCount: 0
+    taskReq: 1
+    Qreward: 
+  - Title: Tutorial 2
+    Qid: 2
+    progress: 0
+    desc: For your next quest, I want you to place a flag down.
+    nxtQuest: 3
+    task: Place a flag
+    taskCount: 0
+    taskReq: 2
+    Qreward: 
+  - Title: Tutorial 3
+    Qid: 3
+    progress: 0
+    desc: Now lets see you try to harvest a block.
+    nxtQuest: 4
+    task: Harvest a block
+    taskCount: 0
+    taskReq: 1
+    Qreward: 
+  - Title: Tutorial 4
+    Qid: 4
+    progress: 0
+    desc: The bridge has been destroyed by the storm! Player, I need you to build
+      a bridge and send a message to the other guy at the other end.
+    nxtQuest: 5
+    task: Talk to the other guy
+    taskCount: 0
+    taskReq: 1
+    Qreward: 
+  - Title: Tutorial 5
+    Qid: 5
+    progress: 0
+    desc: Thanks for passing me the message. Could let the other guy know that I had
+      received his message?
+    nxtQuest: 0
+    task: Return
     taskCount: 0
     taskReq: 1
     Qreward: 

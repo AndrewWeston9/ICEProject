@@ -22,6 +22,11 @@ public class EmoteWheel : MonoBehaviour
     public int CurMenuItem;
     private int OldMenuItem;
     public CanvasGroup WheelButtons;
+    GameObject PCamera;
+    NetworkInstanceId netIDC;
+    PlayerMove pmove;
+    bool setUIToFalse = false;
+
     void Start()
     {
         
@@ -32,7 +37,10 @@ public class EmoteWheel : MonoBehaviour
         }
         CurMenuItem = 0;
         OldMenuItem = 0;
+
+        
     }
+
     void Update()
     {
        
@@ -58,6 +66,24 @@ public class EmoteWheel : MonoBehaviour
             }
         }
 
+        if(menuon == true)
+        {
+            setUIToFalse = false;
+            PCamera = this.transform.parent.gameObject;
+            netIDC = PCamera.GetComponent<NetworkIdentity>().netId;
+            PCamera = ClientScene.FindLocalObject(netIDC);
+            pmove = PCamera.GetComponent<PlayerMove>();
+            pmove.SetUIOpenTrue();
+        }
+        else if (setUIToFalse == false)
+        {
+            setUIToFalse = true;
+            PCamera = this.transform.parent.gameObject;
+            netIDC = PCamera.GetComponent<NetworkIdentity>().netId;
+            PCamera = ClientScene.FindLocalObject(netIDC);
+            pmove = PCamera.GetComponent<PlayerMove>();
+            pmove.SetUIOpenFalse();
+        }
 
 
     }

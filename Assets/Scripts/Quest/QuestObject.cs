@@ -7,6 +7,9 @@ public class QuestObject : MonoBehaviour {
 
     private bool inTrigger = false;
 
+	public bool displayq = false;
+
+
     public List<int> availableIDs = new List<int>();
     public List<int> receivableIDs = new List<int>();
 
@@ -52,19 +55,31 @@ public class QuestObject : MonoBehaviour {
 
 	// Update is called once per frame
 	void Update () {
-		if(inTrigger == true && Input.GetKeyDown(KeyCode.R))
+		if(inTrigger == true && Input.GetKeyDown(KeyCode.R)&& QuestUI.uiManager.activeQuestLog==false)
         {
 			if (!QuestUI.uiManager.activePanel) {
-				
+
+
 				//open UI
 				QuestUI.uiManager.checkQuest (this);
+
+
+				QuestManager.qManager.AddQItem("Talk to the other guy", 1);
+				QuestManager.qManager.AddQItem("Return", 1);
+
+			} else {
+				
+				QuestUI.uiManager.panelHide ();
+				QuestUI.uiManager.acceptBtn.SetActive(false);
+				QuestUI.uiManager.giveupBtn.SetActive(false);
+				QuestUI.uiManager.completeBtn.SetActive(false);
 			}
           
 
         }
 	}
 
-    //NPC have rigidbodave and 2 colliders. 1 collider(non trigger) and the other collider(trigger)
+    //NPC have rigidbody and 2 colliders. 1 collider(non trigger) and the other collider(trigger)
     //Player must have rigidbody, collider(non trigger) and a tag called "Player"
     void OnTriggerEnter(Collider other)
     {

@@ -7,7 +7,7 @@ using System;
 /// Player object management.
 public class PlayerMove : NetworkBehaviour
 {
-
+    bool UIOpen = false;
 	/// A link to the local level representation,which can be
 	/// queried for any player control operations.
 	protected LocalWorld localWorld;
@@ -135,8 +135,8 @@ public class PlayerMove : NetworkBehaviour
 			
 			//Quest Manager log
 			QuestManager.qManager.AddQItem("Place a block", 1);
-
-			y = 0.2f;
+            QuestManager.qManager.AddQItem("Place a flag", 1);
+            y = 0.2f;
 			transform.Translate(0, 1, 0);
 
 			attached = false;
@@ -201,10 +201,16 @@ public class PlayerMove : NetworkBehaviour
 
 		var z = Input.GetAxis("Vertical") * Time.deltaTime * 3.0f;
 		var strafe = Input.GetAxis("Horizontal") * Time.deltaTime * 3.0f;
-		var testY = Input.GetAxis("Mouse Y") * Time.deltaTime * 100.0f;
-
+		var testY = Input.GetAxis("Mouse Y") * Time.deltaTime * 5.0f;
+        
 		/// Update player state based on actions set.
-	transform.Rotate(0, x, 0);
+        /// 
+
+        if (UIOpen == false)
+        {
+            transform.Rotate(0, x, 0);
+        }
+	
 	transform.Translate(strafe, 0, z);
 
 	Rigidbody rb = GetComponent<Rigidbody> ();
@@ -271,9 +277,19 @@ public class PlayerMove : NetworkBehaviour
 		{
 			if(other.gameObject.CompareTag("Block"))
 			{
-				other.gameObject.SetActive(false);
+                other.gameObject.SetActive(false);
 			}
 		}
 	}
+
+    public void SetUIOpenTrue()
+    {
+        UIOpen = true;
+    }
+
+    public void SetUIOpenFalse()
+    {
+        UIOpen = false;
+    }
 
 }

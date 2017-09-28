@@ -615,7 +615,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!1 &1773501264470132
 GameObject:
   m_ObjectHideFlags: 1
@@ -1107,7 +1107,6 @@ MonoBehaviour:
   m_PreferredHeight: -1
   m_FlexibleWidth: 0
   m_FlexibleHeight: 0
-  m_LayoutPriority: 1
 --- !u!114 &114270245255463026
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1178,6 +1177,7 @@ MonoBehaviour:
   ongoingQuest: 0
   activePanel: 0
   activeQuestLog: 0
+  displayLog: 1
   questPanel: {fileID: 1070799642181284}
   questLog: {fileID: 1084686408588094}
   questAvailables: []
@@ -1185,9 +1185,9 @@ MonoBehaviour:
   questBtn: {fileID: 1385638857272858, guid: 94ee1e42eb91751408b6fb05933febe0, type: 2}
   questLogBtn: {fileID: 1385638857272858, guid: a9df641774cc16d4f8a51a70b5e67d4f,
     type: 2}
-  acceptBtn: {fileID: 1760998473159638}
-  giveupBtn: {fileID: 1096529363526046}
-  completeBtn: {fileID: 1310037486354386}
+  acceptBtn: {fileID: 0}
+  giveupBtn: {fileID: 0}
+  completeBtn: {fileID: 0}
   qbtnHolder1: {fileID: 224070724651749162}
   qbtnHolder2: {fileID: 224782251560826938}
   qLogbtnHolder: {fileID: 224826020847205348}
@@ -1272,7 +1272,6 @@ MonoBehaviour:
   m_PreferredHeight: -1
   m_FlexibleWidth: 0
   m_FlexibleHeight: 0
-  m_LayoutPriority: 1
 --- !u!114 &114417687075621612
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1399,15 +1398,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 0.014705896, b: 0.014705896, a: 0.897}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.897}
   m_RaycastTarget: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
     m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
-  m_Sprite: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
-  m_Type: 1
+  m_Sprite: {fileID: 21300000, guid: c6195db28e0c7974a8c6a99e9e67c79b, type: 3}
+  m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -1828,7 +1827,6 @@ MonoBehaviour:
   m_PreferredHeight: -1
   m_FlexibleWidth: 0
   m_FlexibleHeight: 0
-  m_LayoutPriority: 1
 --- !u!114 &114633357688498248
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -2196,15 +2194,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 0.014705896, b: 0.014705896, a: 0.897}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.897}
   m_RaycastTarget: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
     m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
-  m_Sprite: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
-  m_Type: 1
+  m_Sprite: {fileID: 21300000, guid: afd612a2cbc7f75448b9749fd9b9ed01, type: 3}
+  m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -3142,16 +3140,16 @@ RectTransform:
   m_GameObject: {fileID: 1746540605080778}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.9262274, y: 1, z: 1}
   m_Children:
   - {fileID: 224756653027539876}
   m_Father: {fileID: 224831189163435918}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0.86035347}
-  m_AnchorMax: {x: 0.9785681, y: 1}
-  m_AnchoredPosition: {x: 2.62, y: 0.8244629}
-  m_SizeDelta: {x: -3.9, y: -1.6490002}
+  m_AnchorMin: {x: 0.0985681, y: 0.86035347}
+  m_AnchorMax: {x: 0.9785681, y: 0.9933534}
+  m_AnchoredPosition: {x: 0.9000015, y: 2.324463}
+  m_SizeDelta: {x: 19.1, y: 1.3509998}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!224 &224735784300714260
 RectTransform:
@@ -3223,10 +3221,10 @@ RectTransform:
   m_Father: {fileID: 224198482962414302}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 177.58301, y: -15}
+  m_SizeDelta: {x: 355.16602, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!224 &224770351828239846
 RectTransform:

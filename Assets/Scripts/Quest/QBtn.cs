@@ -8,36 +8,6 @@ public class QBtn : MonoBehaviour {
     public int questID;
     public Text questTitle;
 
-	/*private GameObject acceptButton;
-	private GameObject declineButton;
-	private GameObject completeButton;*/
-
-	/*private QBtn acceptScript;
-	private QBtn declineScript;
-	private QBtn completeScript;
-
-
-	void Start()
-	{
-		acceptButton = GameObject.Find ("QuestCanvas").transform.Find ("QuestPanel").transform.Find ("Description").transform.Find ("GameObject").transform.Find ("Accept").gameObject;
-		acceptScript = acceptButton.GetComponent<QBtn> ();
-
-		declineButton = GameObject.Find ("QuestCanvas").transform.Find ("QuestPanel").transform.Find ("Description").transform.Find ("GameObject").transform.Find ("Decline").gameObject;
-		declineScript = declineButton.GetComponent<QBtn> ();
-
-		completeButton = GameObject.Find ("QuestCanvas").transform.Find ("QuestPanel").transform.Find ("Description").transform.Find ("GameObject").transform.Find ("Complete").gameObject;
-		completeScript = completeButton.GetComponent<QBtn> ();
-
-
-		acceptButton.SetActive (false);
-		declineButton.SetActive (false);
-		completeButton.SetActive (false);
-
-
-	}*/
-
-
-
 
 	//Display quest info when player press the quest button in the panel
 	public void DisplayInfos()
@@ -84,6 +54,10 @@ public class QBtn : MonoBehaviour {
 		QuestManager.qManager.AcceptQ (questID);
 		QuestUI.uiManager.panelHide ();
 
+		QuestUI.uiManager.acceptBtn.SetActive(false);
+		QuestUI.uiManager.giveupBtn.SetActive(false);
+		QuestUI.uiManager.completeBtn.SetActive(false);
+
 		QuestObject[] currentQNPC = FindObjectsOfType (typeof(QuestObject)) as QuestObject[];
 
 		foreach (QuestObject obj in currentQNPC) {
@@ -96,6 +70,10 @@ public class QBtn : MonoBehaviour {
 	{
 		QuestManager.qManager.DeclineQ (questID);
 		QuestUI.uiManager.panelHide ();
+
+		QuestUI.uiManager.acceptBtn.SetActive(false);
+		QuestUI.uiManager.giveupBtn.SetActive(false);
+		QuestUI.uiManager.completeBtn.SetActive(false);
 
 		QuestObject[] currentQNPC = FindObjectsOfType (typeof(QuestObject)) as QuestObject[];
 
@@ -110,6 +88,10 @@ public class QBtn : MonoBehaviour {
 		QuestManager.qManager.CompleteQ (questID);
 		QuestUI.uiManager.panelHide ();
 
+		QuestUI.uiManager.acceptBtn.SetActive(false);
+		QuestUI.uiManager.giveupBtn.SetActive(false);
+		QuestUI.uiManager.completeBtn.SetActive(false);
+
 		QuestObject[] currentQNPC = FindObjectsOfType (typeof(QuestObject)) as QuestObject[];
 
 		foreach (QuestObject obj in currentQNPC) {
@@ -121,9 +103,9 @@ public class QBtn : MonoBehaviour {
 	public void closePanel()
 	{
 		QuestUI.uiManager.panelHide ();
-		QuestUI.uiManager.acceptBtn.SetActive (false);
-		QuestUI.uiManager.giveupBtn.SetActive (false);
-		QuestUI.uiManager.completeBtn.SetActive (false);
+		QuestUI.uiManager.acceptBtn.SetActive(false);
+		QuestUI.uiManager.giveupBtn.SetActive(false);
+		QuestUI.uiManager.completeBtn.SetActive(false);
 	}
 
 

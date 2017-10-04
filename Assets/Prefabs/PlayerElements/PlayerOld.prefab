@@ -160,7 +160,7 @@ MonoBehaviour:
   Inventory: []
   skin: {fileID: 11400000, guid: 392bc67276b97944192c91c37aaa937d, type: 2}
   SlotsX: 3
-  SlotsY: 8
+  SlotsY: 5
   Slots: []
 --- !u!114 &114225427403669818
 MonoBehaviour:

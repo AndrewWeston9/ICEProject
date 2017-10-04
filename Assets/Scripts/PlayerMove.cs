@@ -33,6 +33,12 @@ public class PlayerMove : NetworkBehaviour
 	bool checkFlagRangeLast = false;
 	PlayerState playerState;
 
+	public Animator anim;
+	public float speed = 2.0f;
+	public float rotationSpeed = 75.0f;
+
+	int timer = 0;
+
 	/// Access method used when the local world registers itself
 	/// with this player object.
 	public void setLocalWorld (LocalWorld lw)
@@ -136,6 +142,31 @@ public class PlayerMove : NetworkBehaviour
 
 		} */
 
+		float translation = Input.GetAxis ("Vertical") * speed;
+		float rotation = Input.GetAxis ("Horizontal") * rotationSpeed;
+		translation *= Time.deltaTime;
+		rotation *= Time.deltaTime;
+
+		transform.Translate (0, 0, translation);
+		transform.Rotate (0, rotation, 0);
+
+		if (translation != 0) {
+			anim.SetBool ("isWalking", true);
+		} else {
+			anim.SetBool ("isWalking", false);
+		}
+
+		if (Input.GetKey (KeyCode.G) || Input.GetKey (KeyCode.E)) {
+			anim.SetBool ("isGathering", true);
+			timer = 30;
+		} else {
+			timer -= 1;
+
+			if (timer < 0) {
+				anim.SetBool ("isGathering", false);
+			}
+		}
+
 		/// Place block action.
 		if (Input.GetKeyDown(KeyCode.LeftControl) && (isGrounded () || attached))
 		{
@@ -143,23 +174,27 @@ public class PlayerMove : NetworkBehaviour
 			{
 			if(!checkFlagRange() && (checkResource() || currentBlockType == 10 || currentBlockType == 1))
 				{
-					int px = (int)(playerpos.x + 0.5);
+					int px = (int)(playerpos.x + 0.5f);
 					int py = Math.Max ((int)(playerpos.y), (int)WorldManager.minLevelHeight);
-					int pz = (int)(playerpos.z + 0.5);
+					int pz = (int)(playerpos.z + 0.5f);
 
 					Debug.Log ("place at " + px + " " + pz + " " + py);
-					localWorld.placeBlock (px, pz, py, currentBlockType);
+					if (attached) {	
+						localWorld.placeBlock (px, pz, py, currentBlockType);
+					} else {
+						localWorld.placeBlock (px, pz, py + 1.0f, currentBlockType);
+					}
 				
 					//Quest Manager log
 					QuestManager.qManager.AddQItem ("Place a block", 1);
 					y = 0.2f;
 					if (currentBlockType == 10) {
 						playerFlagPlaced = true;
-						transform.Translate (0, 2.5f, 0);
+						transform.Translate (0, 3.0f, 0);
 						//Quest Manager log
 						QuestManager.qManager.AddQItem ("Place a flag", 1);
 					} else {
-						transform.Translate (0, 1, 0);
+						transform.Translate (0, 1.5f, 0);
 					}
 					adjustResource();
 					attached = false;
@@ -294,10 +329,11 @@ public class PlayerMove : NetworkBehaviour
 	///   - attach the main camera to give a external, tracked view of the player.
 	public override void OnStartLocalPlayer()
 	{
-		GameObject playerShape = transform.Find("PlayerShape").gameObject;
-		playerShape.GetComponent<MeshRenderer>().material.color = Color.blue; 
+		GameObject playerShape = transform.Find("FemaleShape").gameObject;
+		Debug.LogError (playerShape.name);
+		//playerShape.GetComponent<MeshRenderer>().material.color = Color.blue; 
 		playerState = gameObject.GetComponent<PlayerState> ();
-		
+		anim = this.GetComponent<Animator> ();
 		if(isLocalPlayer)
 		{ //if I am the owner of this prefab
 			GameObject camera = GameObject.Find("Main Camera");

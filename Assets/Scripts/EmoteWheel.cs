@@ -120,7 +120,7 @@ public class EmoteWheel : MonoBehaviour
 		GameObject Player = this.transform.parent.gameObject;
 		NetworkInstanceId netID = Player.GetComponent<NetworkIdentity>().netId;
 		Debug.Log ("Sending emote with networkID: " + netID.ToString());
-        Vector3 offset = new Vector3(0.0f, 2.0f, 0.0f);
+        Vector3 offset = new Vector3(0.0f, 2.5f, 0.0f);
         //IconObject DisplayEmote;
         if (CurMenuItem == 0)
         {
@@ -166,7 +166,7 @@ public class IconObject : MonoBehaviour
 	}
 	public GameObject EmotePicture;
 	GameObject Player;
-	Vector3 offset = new Vector3(0.0f, 1.5f, 0.0f);
+	Vector3 offset = new Vector3(0.0f, 2.5f, 0.0f);
 	// public Sprite Emotetype;
 	// SpriteRenderer SR;
 	NetworkInstanceId NetID;

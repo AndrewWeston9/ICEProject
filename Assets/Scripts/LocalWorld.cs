@@ -45,6 +45,16 @@ class SendEmoteMessageAndClientID : MessageBase
 	public NetworkInstanceId netId;
 }
 
+class PlayerFlagMessage : MessageBase
+{
+	/// Position of the flag object.
+	public Vector3 position;
+	/// Connection ID for the player placing or removing the flag.
+	public int connid;
+	/// Return to client as false if the flag cannot be removed by that player.
+	public bool removed;
+}
+
 /*class PlayerListMessage : MessageBase
 {
 	public int connectionId;
@@ -192,6 +202,7 @@ public class LocalWorld : NetworkBehaviour {
                 
         NetworkClient.allClients[0].RegisterHandler (LevelMsgType.LevelResponse, ServerCommandHandler);
 		NetworkClient.allClients[0].RegisterHandler (LevelMsgType.EmoteSingleSender, ServerCommandHandler); // Handle incoming emotes from server
+		NetworkClient.allClients[0].RegisterHandler (LevelMsgType.PlayerFlagRequest, ServerCommandHandler);
     }
     
     // Update is called once per frame
@@ -278,6 +289,21 @@ public class LocalWorld : NetworkBehaviour {
 				SendEmoteMessageAndClientID m = netMsg.ReadMessage<SendEmoteMessageAndClientID> ();
 				displayEmote(m.emoteType, m.netId);
 				Debug.Log ("Incoming emote to client from server from network id: " + m.netId);
+			}
+			break;
+
+			case LevelMsgType.PlayerFlagRequest:
+			{
+				PlayerFlagMessage m = netMsg.ReadMessage<PlayerFlagMessage> ();
+				if (m.removed == false)
+				{
+					//Do UI message to player here informing them of failure to remove flag.
+				}
+				if (m.removed == true)
+				{
+					PlayerMove player = ClientScene.localPlayers[0].gameObject.GetComponent <PlayerMove>();
+					player.playerFlagPlaced = false;
+				}
 			}
 			break;
             

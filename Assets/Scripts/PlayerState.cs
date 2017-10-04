@@ -9,7 +9,7 @@ public class PlayerState : NetworkBehaviour {
     private const float barSize = 0.2f;
 
 //     [SyncVar(hook = "OnChangeResourceLevels")]
-    public SyncListFloat resourceLevels = new SyncListFloat ();
+	public List<float> resourceLevels;
     [SyncVar(hook = "OnChangeResources")]
     private bool resourceChanged;
     
@@ -29,9 +29,9 @@ public class PlayerState : NetworkBehaviour {
 
     // Use this for initialization
     void Start () {
-        resourceLevels.Add (0.05f);
-        resourceLevels.Add (0.05f);
-        resourceLevels.Add (0.05f);
+        resourceLevels.Add (0.1f);
+        resourceLevels.Add (0.1f);
+        resourceLevels.Add (0.1f);
         
         OnChangeResourceLevels (resourceLevels);
 
@@ -64,14 +64,14 @@ public class PlayerState : NetworkBehaviour {
 		}
 	}*/
     
-    public void changeResource (int resourceType, float deltaResource)
+	public void changeResource (int resourceType, float deltaResource)
     {
         //if (!isServer)
         //{
            // return;
        // }
-        
-        resourceLevels[resourceType] += deltaResource;
+
+		resourceLevels [resourceType] += deltaResource;
         
         if (resourceLevels[resourceType] > 1.0f)
         {
@@ -92,13 +92,13 @@ public class PlayerState : NetworkBehaviour {
 //           Debug.Log ("Updating resource");
 //           GUI.DrawTexture(new Rect(10, 10, 60, 60), aTexture, ScaleMode.ScaleToFit, true, 10.0F);
 //       }
-    void OnChangeResourceLevels (SyncListFloat resourceLevels )
+	void OnChangeResourceLevels (List<float> resourceLevels )
     {
                 Debug.Log ("Refresh");
-        if (!isLocalPlayer)
-        {
-            return;
-        }
+        //if (!isLocalPlayer)
+        //{
+          //  return;
+        //}
                 
         // Initialize objects for the resource bar.
         if (resourceDisplayObjects == null)
@@ -167,6 +167,36 @@ public class PlayerState : NetworkBehaviour {
 			m.amount = -1;
 			NetworkManager.singleton.client.Send (LevelMsgType.ResourceUpdate, m);  
 		}
+	}
+
+	public void expendResorce(int type, float amount)
+	{
+		if (type == 2) {
+			changeResource (0, amount);
+			OnChangeResources (resourceChanged);
+		}
+		if (type == 3) {
+			changeResource (1, amount);
+			OnChangeResources (resourceChanged);
+		}
+		if (type == 4) {
+			changeResource (2, amount);
+			OnChangeResources (resourceChanged);
+		}
+	}
+
+	public float getResource(int type)
+	{
+		if (type == 2) {
+			return resourceLevels [0];
+		}
+		if (type == 3) {
+			return resourceLevels [1];
+		}
+		if (type == 4) {
+			return resourceLevels [2];
+		}
+		return 0.0f;
 	}
 
 	void OnTriggerEnter(Collider other)

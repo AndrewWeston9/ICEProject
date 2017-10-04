@@ -438,6 +438,7 @@ MonoBehaviour:
   m_SpawnPrefabs:
   - {fileID: 1593302540197858, guid: 9a0fc4981381a48c6ac89ed54571612d, type: 2}
   - {fileID: 1739860613409280, guid: acc5dee64d15d40f680190f37ddf8259, type: 2}
+  - {fileID: 1593273622038144, guid: 608baefc50620f04b9f2203780729db8, type: 2}
   m_CustomConfig: 0
   m_MaxConnections: 4
   m_ConnectionConfig:
@@ -495,7 +496,7 @@ MonoBehaviour:
   matchMaker: {fileID: 0}
   worldManagerPrefab: {fileID: 1012833729504368, guid: a4bbe7889e3984bfeaa167d096b245e6,
     type: 2}
-  stormCloud: {fileID: 1430330017801152, guid: 133647a8f7cacf7488e6483d3997aa6d, type: 2}
+  stormCloud: {fileID: 1430330017801152, guid: 7de1d76bb7639d74ab7efac0ee11db8f, type: 2}
   localLevelPrefab: {fileID: 1593302540197858, guid: 9a0fc4981381a48c6ac89ed54571612d,
     type: 2}
 --- !u!114 &794533761

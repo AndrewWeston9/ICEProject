@@ -22,6 +22,7 @@ public class StormCloud : NetworkBehaviour
 	void Start ()
     {
         InvokeRepeating("DestroyStuff", 0.1f, 2f);
+        Direcion = new Vector3(Random.Range(-5.0f, 5.0f), 0, Random.Range(-5.0f, 5.0f));
     }
 
     void Awake()
@@ -35,8 +36,8 @@ public class StormCloud : NetworkBehaviour
         var shapetemp = Rainparticle.shape;
 
         //shapetemp.scale = new Vector3(1,1,1);
-        shapetemp.box.Set(1,1,1);
-        transform.localScale = new Vector3(CloudX, CloudY, CloudZ);
+        //shapetemp.scale.Set(1,1,1);
+        transform.localScale = new Vector3(Random.Range(10.0f, 20.0f), Random.Range(3.0f, 5.0f), Random.Range(10.0f, 20.0f));
     
  
         InvokeRepeating("DestroyStuff", 0.0f, 1f);
@@ -68,8 +69,8 @@ public class StormCloud : NetworkBehaviour
         if (Physics.Raycast(LightningOrigin, -Vector3.up, out ObjectHit, 100))
         {
             //print("Found an object - distance: " + ObjectHit.distance);
-            print("Found an object - Name: " + ObjectHit.collider.name);
-            print("Found an object - Tag: " + ObjectHit.collider.tag);
+          //  print("Found an object - Name: " + ObjectHit.collider.name);
+         //   print("Found an object - Tag: " + ObjectHit.collider.tag);
             if(ObjectHit.collider.tag ==  "Block" || ObjectHit.collider.tag == "Resource")
             {
                 // Destroy(ObjectHit.collider.gameObject.gameObject);
@@ -79,7 +80,7 @@ public class StormCloud : NetworkBehaviour
 
                 ResourceTakeMessage m = new ResourceTakeMessage();
                 m.position = ObjectHit.collider.transform.position;
-                m.amount = -1000;
+                m.amount = -2;
                 NetworkManager.singleton.client.Send(LevelMsgType.ResourceUpdate, m);
 
                 print("Object: Destoryed");

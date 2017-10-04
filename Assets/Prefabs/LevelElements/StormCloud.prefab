@@ -105,12 +105,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 1430330017801152}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c54a40e0bde7d4242b148a147024df78, type: 3}
+  m_Script: {fileID: 11500000, guid: 675030f9c0ec0ba4b9046dbe23c1ad7d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  CloudX: 11
-  CloudY: 0.2
-  CloudZ: 11
+  CloudX: 1
+  CloudY: 1
+  CloudZ: 1
   Direcion: {x: 1, y: 1, z: 1}
   Speed: 1
   CloudLevel: 0
@@ -128,22 +128,22 @@ MonoBehaviour:
   m_SceneId:
     m_Value: 0
   m_AssetId:
-    i0: 19
-    i1: 54
-    i2: 71
-    i3: 168
-    i4: 247
-    i5: 202
-    i6: 207
+    i0: 125
+    i1: 225
+    i2: 215
+    i3: 107
+    i4: 183
+    i5: 99
+    i6: 157
     i7: 116
-    i8: 136
-    i9: 230
-    i10: 72
-    i11: 61
-    i12: 57
-    i13: 151
-    i14: 170
-    i15: 109
+    i8: 171
+    i9: 126
+    i10: 250
+    i11: 192
+    i12: 238
+    i13: 17
+    i14: 219
+    i15: 143
   m_ServerOnly: 0
   m_LocalPlayerAuthority: 0
 --- !u!198 &198734793721735528
@@ -292,8 +292,8 @@ ParticleSystem:
     startColor:
       serializedVersion: 2
       minMaxState: 2
-      minColor: {r: 1, g: 1, b: 1, a: 0.659}
-      maxColor: {r: 1, g: 1, b: 1, a: 0}
+      minColor: {r: 1, g: 1, b: 1, a: 1}
+      maxColor: {r: 1, g: 1, b: 1, a: 1}
       maxGradient:
         serializedVersion: 2
         key0: {r: 1, g: 1, b: 1, a: 1}
@@ -355,7 +355,7 @@ ParticleSystem:
     startSize:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 0.3
+      scalar: 0.007
       minScalar: 1
       maxCurve:
         serializedVersion: 2
@@ -396,7 +396,7 @@ ParticleSystem:
     startSizeY:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 1
+      scalar: 0.02
       minScalar: 1
       maxCurve:
         serializedVersion: 2
@@ -437,7 +437,7 @@ ParticleSystem:
     startSizeZ:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 1
+      scalar: 0.007
       minScalar: 1
       maxCurve:
         serializedVersion: 2
@@ -600,7 +600,7 @@ ParticleSystem:
         m_RotationOrder: 4
     randomizeRotationDirection: 0
     maxNumParticles: 1000
-    size3D: 0
+    size3D: 1
     rotation3D: 0
     gravityModifier:
       serializedVersion: 2
@@ -3306,10 +3306,10 @@ ParticleSystemRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_RenderMode: 0
+  m_RenderMode: 1
   m_SortMode: 0
   m_MinParticleSize: 0
-  m_MaxParticleSize: 0.5
+  m_MaxParticleSize: 1
   m_CameraVelocityScale: 0
   m_VelocityScale: 0
   m_LengthScale: 2

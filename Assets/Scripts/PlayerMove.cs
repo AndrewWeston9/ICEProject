@@ -21,6 +21,18 @@ public class PlayerMove : NetworkBehaviour
 	// Current block type selected by the player to be placed.
 	int currentBlockType = 1;
 
+	/// Is the player flag placed in the world.
+	public bool playerFlagPlaced = false;
+
+	bool inTrigger = false;
+
+	GameObject flagShortest;
+
+	/// Timer for flag check
+	int flagTimer = 0;
+	bool checkFlagRangeLast = false;
+	PlayerState playerState;
+
 	/// Access method used when the local world registers itself
 	/// with this player object.
 	public void setLocalWorld (LocalWorld lw)
@@ -34,13 +46,14 @@ public class PlayerMove : NetworkBehaviour
 	///   - check that the player stays in a valid region.
 	void Update()
 	{
+		flagTimer -= 1;
 		DontDestroyOnLoad (this.gameObject);
 		;
 
 		Ray ray = Camera.main.ScreenPointToRay(new Vector3((Screen.width/2),(Screen.height/2),0));
 		RaycastHit hit;
 
-		Debug.Log ("Player update - " + isLocalPlayer + " - " + localWorld);
+		//Debug.Log ("Player update - " + isLocalPlayer + " - " + localWorld);
 
 		if (!isLocalPlayer)
 		{
@@ -126,24 +139,36 @@ public class PlayerMove : NetworkBehaviour
 		/// Place block action.
 		if (Input.GetKeyDown(KeyCode.LeftControl) && (isGrounded () || attached))
 		{
-			int px = (int) (playerpos.x + 0.5);
-			int py = Math.Max ((int) (playerpos.y), (int) WorldManager.minLevelHeight);
-			int pz = (int) (playerpos.z + 0.5);
+			if (playerFlagPlaced == false || currentBlockType != 10)
+			{
+			if(!checkFlagRange() && (checkResource() || currentBlockType == 10 || currentBlockType == 1))
+				{
+					int px = (int)(playerpos.x + 0.5);
+					int py = Math.Max ((int)(playerpos.y), (int)WorldManager.minLevelHeight);
+					int pz = (int)(playerpos.z + 0.5);
 
-			Debug.Log ("place at " + px + " " + pz + " " + py);
-			localWorld.placeBlock (px, pz, py, currentBlockType);
-			
-			//Quest Manager log
-			QuestManager.qManager.AddQItem("Place a block", 1);
-            QuestManager.qManager.AddQItem("Place a flag", 1);
-            y = 0.2f;
-			transform.Translate(0, 1, 0);
-
-			attached = false;
+					Debug.Log ("place at " + px + " " + pz + " " + py);
+					localWorld.placeBlock (px, pz, py, currentBlockType);
+				
+					//Quest Manager log
+					QuestManager.qManager.AddQItem ("Place a block", 1);
+					y = 0.2f;
+					if (currentBlockType == 10) {
+						playerFlagPlaced = true;
+						transform.Translate (0, 2.5f, 0);
+						//Quest Manager log
+						QuestManager.qManager.AddQItem ("Place a flag", 1);
+					} else {
+						transform.Translate (0, 1, 0);
+					}
+					adjustResource();
+					attached = false;
+				}
+			}
 		}
 
 		/// Take Resources action.
-		if (Input.GetKeyDown (KeyCode.G))
+		if (Input.GetKeyDown (KeyCode.G) && !checkFlagRange())
 		{
 			PlayerState pstate = this.GetComponent<PlayerState> ();
 			pstate.takeResource ();
@@ -169,19 +194,29 @@ public class PlayerMove : NetworkBehaviour
 		{
 			currentBlockType = 4;
 		}
+		if (Input.GetKey (KeyCode.Alpha0))
+		{
+			currentBlockType = 10;
+		}
 
 		//Pick up 
 
-		if(Input.GetKey(KeyCode.E)&& (isGrounded () || attached))
+		if(Input.GetKey(KeyCode.E) && playerFlagPlaced == true)
 		{
-			if(Physics.Raycast(ray, out hit, 50))
+			/*if(Physics.Raycast(ray, out hit, 50))
 			{
 				pickup = true;
 			}
 		}
 		else
 		{
-			pickup = false;
+			pickup = false;*/
+
+			if (checkFlagRange())
+			{
+				removeFlag ();
+			}
+			
 		}
 
 		//open inventory window
@@ -261,6 +296,7 @@ public class PlayerMove : NetworkBehaviour
 	{
 		GameObject playerShape = transform.Find("PlayerShape").gameObject;
 		playerShape.GetComponent<MeshRenderer>().material.color = Color.blue; 
+		playerState = gameObject.GetComponent<PlayerState> ();
 		
 		if(isLocalPlayer)
 		{ //if I am the owner of this prefab
@@ -268,6 +304,58 @@ public class PlayerMove : NetworkBehaviour
 			Debug.Log ("Setup camera" + camera);
 			camera.transform.parent = transform;
 		}
+	}
+
+	public void removeFlag()
+	{
+		inTrigger = false;
+		PlayerFlagMessage m = new PlayerFlagMessage ();
+		m.position = flagShortest.transform.position;
+		NetworkManager.singleton.client.Send (LevelMsgType.PlayerFlagRequest, m);
+	}
+
+	// Returns true if a flag is within range.
+	public bool checkFlagRange()
+	{
+		if (flagTimer < 1)
+		{
+			GameObject[] flagList = GameObject.FindGameObjectsWithTag ("Flag");
+			float distanceShortest = 1000;
+			foreach (GameObject flag in flagList) {
+				float distance = Vector3.Distance (flag.transform.position, this.transform.position);
+				if (distance < distanceShortest) {
+					distanceShortest = distance;
+					flagShortest = flag;
+				}
+			}
+			if (distanceShortest < 3.5f)
+			{
+				checkFlagRangeLast = true;
+				return true;
+				flagTimer = 30;
+			}
+			flagTimer = 30;	
+			checkFlagRangeLast = false;
+			return false;
+		}
+		else
+		{
+			return checkFlagRangeLast;
+		}
+	}
+	
+	public void adjustResource()
+	{
+		playerState.expendResorce (currentBlockType, -0.1f);
+	}
+
+	public bool checkResource()
+	{
+		if(playerState.getResource (currentBlockType) >= 0.1f)
+		{
+			return true;
+		}
+		return false;
 	}
 
 	//when ray collide with blocks

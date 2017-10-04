@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
 
-public class InvInventory : MonoBehaviour {
+public class InvInventory : NetworkBehaviour {
 
     public List<InvItem> Inventory = new List<InvItem>();
     public GUISkin skin;
@@ -22,6 +22,7 @@ public class InvInventory : MonoBehaviour {
 
     //GameObject Player;
     PlayerMove pmove;
+	PlayerState pstate;
 
 
 	void Start ()
@@ -46,12 +47,14 @@ public class InvInventory : MonoBehaviour {
         print(InventoryContains(3));
 
         //Player = this.transform.parent.gameObject;
-        
+
+
     }
 
     void Awake()
     {
         pmove = this.GetComponent<PlayerMove>();
+
     }
 	
     void OnGUI()
@@ -108,14 +111,19 @@ public class InvInventory : MonoBehaviour {
         Event e = Event.current;
 
 
-        GameObject thePlayer = GameObject.Find("Player(Clone)");
-        PlayerState playerScript = thePlayer.GetComponent<PlayerState>();
-        playerScript.resourceLevels.ToString();
+		pstate = this.GetComponent<PlayerState>();
+		//GameObject Player = this.transform.parent.gameObject;
+		//pstate = Player.GetComponent<PlayerState>();
+		pstate.resourceLevels.ToString();
+		//Debug.LogError ("pstate netid: " + pstate.netId);
         for (int j = 0; j < GloopResources.NumberOfResources; j++)
         {
-       
-        Rect ResourceFrame = new Rect(Screen.width - 325f,(100f * j),100,100);
-        GUI.Box(ResourceFrame, playerScript.resourceLevels[j].ToString(), skin.GetStyle("Slot Background"));
+       		
+	        Rect ResourceFrame = new Rect(Screen.width - 325f,(100f * j),100,100);
+			float tempResourceLevel;
+			tempResourceLevel = pstate.getResource(j + 2);
+			tempResourceLevel = tempResourceLevel * 100;
+			GUI.Box(ResourceFrame, tempResourceLevel.ToString("F0"), skin.GetStyle("Slot Background"));
         }
         
         int i = 0;

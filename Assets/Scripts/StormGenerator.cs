@@ -7,7 +7,7 @@ public class StormGenerator : NetworkBehaviour
 
     public GameObject stormCloud;
 
-    Vector3 CloudPosition = new Vector3(18, 5, 7);
+    Vector3 CloudPosition;//= new Vector3(18, 5, 7);
     Quaternion CloudRotation= Quaternion.identity;
     void GenerateCloud(Vector3 Position, Vector3 Direction, int CloudLevel)
     {
@@ -29,18 +29,18 @@ public class StormGenerator : NetworkBehaviour
 
     // Use this for initialization
     void Start() {
-
+       InvokeRepeating("SpawnObjectRand",1,10);
     }
 
     // Update is called once per frame
     void Update()
     {
 
-
-        if (Input.GetButtonDown("Fire2"))
+        
+        if (Input.GetButtonDown("Cloud"))
         {
 
-            SpawnObject();
+            SpawnObjectRand();
 
         }
     }
@@ -48,7 +48,15 @@ public class StormGenerator : NetworkBehaviour
     [Server]
     public void SpawnObject()
     {
+        CloudPosition = new Vector3(18, 5, 7);
         GameObject obj = (GameObject)Instantiate(stormCloud, CloudPosition, CloudRotation);
+        NetworkServer.Spawn(obj);
+    }
+
+    public void SpawnObjectRand()
+    {
+        Vector3 Cposition = new Vector3(Random.Range(-10.0f, 100.0f),40, Random.Range(-10.0f, 100.0f));
+        GameObject obj = (GameObject)Instantiate(stormCloud, Cposition, CloudRotation);
         NetworkServer.Spawn(obj);
     }
 }

@@ -21,6 +21,7 @@ GameObject:
   - component: {fileID: 4271978611700262}
   - component: {fileID: 33926439874434158}
   - component: {fileID: 23274220376333454}
+  - component: {fileID: 64403893784324796}
   m_Layer: 0
   m_Name: default
   m_TagString: Untagged
@@ -85,7 +86,7 @@ MeshRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_Materials:
-  - {fileID: 2100000, guid: db988cfd29af28a4aa1f40191cb66e91, type: 2}
+  - {fileID: 2100000, guid: f72fc8ef3526e0b489c0536e0243df8b, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -110,7 +111,7 @@ MeshFilter:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1309858982146788}
-  m_Mesh: {fileID: 4300000, guid: c2b76833cf3e77b46ab522fef3b65649, type: 3}
+  m_Mesh: {fileID: 4300000, guid: d56030cc53a20f34d8862c6a246491d4, type: 3}
 --- !u!64 &64206582326348700
 MeshCollider:
   m_ObjectHideFlags: 1
@@ -125,6 +126,20 @@ MeshCollider:
   m_InflateMesh: 1
   m_SkinWidth: 0.1
   m_Mesh: {fileID: 4300000, guid: c2b76833cf3e77b46ab522fef3b65649, type: 3}
+--- !u!64 &64403893784324796
+MeshCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1309858982146788}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Convex: 0
+  m_InflateMesh: 0
+  m_SkinWidth: 0.01
+  m_Mesh: {fileID: 4300000, guid: d56030cc53a20f34d8862c6a246491d4, type: 3}
 --- !u!65 &65086985692443758
 BoxCollider:
   m_ObjectHideFlags: 1

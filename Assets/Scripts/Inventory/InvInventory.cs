@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
 
-public class InvInventory : NetworkBehaviour {
+public class InvInventory1 : MonoBehaviour {
 
     public List<InvItem> Inventory = new List<InvItem>();
     public GUISkin skin;
@@ -48,12 +48,11 @@ public class InvInventory : NetworkBehaviour {
 
         //Player = this.transform.parent.gameObject;
 
-
     }
 
     void Awake()
     {
-        pmove = this.GetComponent<PlayerMove>();
+		pmove = this.GetComponent<PlayerMove>();
 
     }
 	
@@ -111,11 +110,12 @@ public class InvInventory : NetworkBehaviour {
         Event e = Event.current;
 
 
-		pstate = this.GetComponent<PlayerState>();
-		//GameObject Player = this.transform.parent.gameObject;
+		//pstate = this.GetComponent<PlayerState>();
+		//GameObject Player = pmove.gameObject;
 		//pstate = Player.GetComponent<PlayerState>();
+		pstate = gameObject.GetComponent<PlayerState>();
 		pstate.resourceLevels.ToString();
-		//Debug.LogError ("pstate netid: " + pstate.netId);
+		//Debug.LogError ("pstate: " + pstate.gameObject);
         for (int j = 0; j < GloopResources.NumberOfResources; j++)
         {
        		

@@ -25,6 +25,8 @@ public class PlayerState : NetworkBehaviour {
 
 	private Vector3 ResourcePosition;
 
+	PlayerMove pmove;
+
 	//GameObject playerObject;
 
     // Use this for initialization
@@ -38,6 +40,8 @@ public class PlayerState : NetworkBehaviour {
 		inTrigger = false;
 		ResourceName = "";
 		ResourcePosition = new Vector3 ();
+
+		pmove = gameObject.GetComponent<PlayerMove>();
     }
 
 	void Update()
@@ -72,10 +76,12 @@ public class PlayerState : NetworkBehaviour {
        // }
 
 		resourceLevels [resourceType] += deltaResource;
+		pmove.resourceLevelsPMove [resourceType] += deltaResource;
         
         if (resourceLevels[resourceType] > 1.0f)
         {
             resourceLevels[resourceType] = 1.0f;
+			pmove.resourceLevelsPMove [resourceType] = 1.0f;
         }
         
         resourceChanged = !resourceChanged;
@@ -101,7 +107,7 @@ public class PlayerState : NetworkBehaviour {
         //}
                 
         // Initialize objects for the resource bar.
-        if (resourceDisplayObjects == null)
+       /* if (resourceDisplayObjects == null)
         {
             /// The object under which resource display elements are shown.
             GameObject resourceAreaDisplay = GameObject.Find("ResourceAreaDisplay");
@@ -126,7 +132,7 @@ public class PlayerState : NetworkBehaviour {
             resourceDisplayObjects[i].transform.localScale = new Vector3 (amt, barSize, barSize);
             
             position += barSize;
-        }
+        }*/
     }
 
 	public void takeResource()
@@ -137,6 +143,7 @@ public class PlayerState : NetworkBehaviour {
             //Debug.LogError ("In resource trigger range!!!!!!!!!!!!!!!!!!!!!!");
             changeResource (0, 0.05f);
 			OnChangeResources (resourceChanged);
+			//pmove = gameObject.GetComponent<PlayerMove> ();
 			inTrigger = false;
 			ResourceTakeMessage m = new ResourceTakeMessage ();
 			m.position = ResourcePosition;
@@ -149,6 +156,7 @@ public class PlayerState : NetworkBehaviour {
             //Debug.LogError ("In resource trigger range!!!!!!!!!!!!!!!!!!!!!!");
             changeResource (1, 0.05f);
 			OnChangeResources (resourceChanged);
+			//pmove = gameObject.GetComponent<PlayerMove> ();
 			inTrigger = false;
 			ResourceTakeMessage m = new ResourceTakeMessage ();
 			m.position = ResourcePosition;
@@ -161,6 +169,7 @@ public class PlayerState : NetworkBehaviour {
             //Debug.LogError ("In resource trigger range!!!!!!!!!!!!!!!!!!!!!!");
             changeResource (2, 0.05f);
 			OnChangeResources (resourceChanged);
+			//pmove = gameObject.GetComponent<PlayerMove> ();
 			inTrigger = false;
 			ResourceTakeMessage m = new ResourceTakeMessage ();
 			m.position = ResourcePosition;

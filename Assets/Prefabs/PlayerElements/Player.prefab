@@ -462,10 +462,10 @@ GameObject:
   - component: {fileID: 114247541455777284}
   - component: {fileID: 54006342078287418}
   - component: {fileID: 114588783958053738}
-  - component: {fileID: 95387889003036836}
-  - component: {fileID: 135119329265706304}
-  - component: {fileID: 114976458643349342}
   - component: {fileID: 64309959129971298}
+  - component: {fileID: 114976458643349342}
+  - component: {fileID: 95387889003036836}
+  - component: {fileID: 114220961192115598}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -1014,7 +1014,7 @@ Transform:
   m_GameObject: {fileID: 1515263113721340}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 3, y: 3, z: 3}
+  m_LocalScale: {x: 3.5, y: 3.5, z: 3.5}
   m_Children:
   - {fileID: 4367697594939504}
   - {fileID: 4097228382420582}
@@ -1302,8 +1302,8 @@ MeshCollider:
   m_Enabled: 1
   serializedVersion: 2
   m_Convex: 1
-  m_InflateMesh: 0
-  m_SkinWidth: 0.01
+  m_InflateMesh: 1
+  m_SkinWidth: 0.03
   m_Mesh: {fileID: 4300000, guid: 2461fc9c0d610c94d83033cabf76353e, type: 3}
 --- !u!64 &64633399713444378
 MeshCollider:
@@ -1316,8 +1316,8 @@ MeshCollider:
   m_Enabled: 1
   serializedVersion: 2
   m_Convex: 1
-  m_InflateMesh: 0
-  m_SkinWidth: 0.01
+  m_InflateMesh: 1
+  m_SkinWidth: 0.03
   m_Mesh: {fileID: 4300000, guid: 2461fc9c0d610c94d83033cabf76353e, type: 3}
 --- !u!95 &95387889003036836
 Animator:
@@ -1328,7 +1328,7 @@ Animator:
   m_GameObject: {fileID: 1515263113721340}
   m_Enabled: 1
   m_Avatar: {fileID: 9000000, guid: 2461fc9c0d610c94d83033cabf76353e, type: 3}
-  m_Controller: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: f60e618bddf48cf4980f5ea2ccf76b41, type: 2}
   m_CullingMode: 1
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -1336,6 +1336,20 @@ Animator:
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
+--- !u!114 &114220961192115598
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1515263113721340}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 639834785a1bd364c9e0f12bc020ef3b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  anim: {fileID: 0}
+  speed: 2
+  rotationSpeed: 75
 --- !u!114 &114247541455777284
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1415,34 +1429,50 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerFlagPlaced: 0
+  anim: {fileID: 0}
+  speed: 2
+  rotationSpeed: 75
+  resourceLevelsPMove: []
+  Inventory: []
+  skin: {fileID: 11400000, guid: 392bc67276b97944192c91c37aaa937d, type: 2}
+  SlotsX: 3
+  SlotsY: 5
+  Slots: []
 --- !u!114 &114976458643349342
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1515263113721340}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a520dbbd225327f4ab4523220da802f4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_LastSendTime: 0
+  m_SyncVarGuard: 0
+  m_MyView: {fileID: 0}
   Inventory: []
   skin: {fileID: 11400000, guid: 392bc67276b97944192c91c37aaa937d, type: 2}
-  SlotsX: 3
-  SlotsY: 8
+  SlotsX: 4
+  SlotsY: 5
   Slots: []
---- !u!135 &135119329265706304
-SphereCollider:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1515263113721340}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 0
-  serializedVersion: 2
-  m_Radius: 0.2
-  m_Center: {x: 0, y: 0, z: 0}
+  showInventory: 0
+  database: {fileID: 0}
+  ShowTooltip: 0
+  tooltip: 
+  draggingItem: 0
+  DraggedItem:
+    itemName: 
+    itemID: 0
+    itemDesc: 
+    itemIcon: {fileID: 0}
+    itemAmount: 0
+    itemType: 0
+  PreviousIndex: 0
+  setUIToFalse: 1
+  pmove: {fileID: 0}
+  pstate: {fileID: 0}
 --- !u!137 &137593240263795726
 SkinnedMeshRenderer:
   m_ObjectHideFlags: 1

@@ -468,7 +468,7 @@ public class EmoteDisplayClass : ScriptableObject
 		//int InstanceID = Player.GetComponent (NetworkInstanceId);
 		//string netID = Player.GetComponent<NetworkIdentity>().netId.ToString();
 		Debug.Log ("Player network ID Received by client: " + Player.GetComponent<NetworkIdentity>().netId.ToString());
-		Vector3 offset = new Vector3(0.0f, 1.5f, 0.0f);
+		Vector3 offset = new Vector3(0.0f, 2.5f, 0.0f);
 
 		if (emoteType == 0)
 		{
